@@ -42,13 +42,12 @@
   .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
   .hero__note { font-family: var(--font-hand); font-size: var(--text-xl); color: var(--brand-taupe);
     margin-top: var(--space-5); transform: rotate(-1.5deg); }
-  /* Real debut card — pinned with tape, single framing (the card already carries its own scrapbook decor) */
+  /* 캐릭터 컷아웃을 스티커로 붙인다 — 테두리·그림자는 .sticker 가 filter 로
+     담당하므로 여기선 각도와 호버만 얹는다. 테이프는 없다: 붙일 사각 모서리가
+     없어서 컷아웃 위에선 허공에 뜬다. */
   .hero__photo { position: relative; margin: 0; --rest-rot: -2deg; transform: rotate(var(--rest-rot));
-    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
-  .hero__photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
+    transition: transform var(--dur-base) var(--ease-paper); }
   .hero__photo:hover { transform: rotate(0deg) translateY(-4px); }
-  .hero__photo .tape { z-index: 2; }
 
   /* ---- Profile spec ----------------------------------------------------- */
   .profile { padding: var(--space-7) 0; }
@@ -87,7 +86,8 @@
   /* Inked charcoal mascot — the panel's single flourish. The artwork sits on the
      page surface, so it follows the page theme via a src swap in site.js. */
   .social__mascot { display: block; width: 116px; height: auto; margin: 0 auto var(--space-4);
-    transform: rotate(-3deg); transition: transform var(--dur-base) var(--ease-paper); }
+    --rest-rot: -3deg; transform: rotate(var(--rest-rot));
+    transition: transform var(--dur-base) var(--ease-paper); }
   .social__mascot:hover { transform: rotate(0deg) translateY(-3px); }
   .social__row { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;
     list-style: none; margin: 0; padding: 0; }
@@ -104,6 +104,20 @@
   .slink small { font-family: var(--font-mono); font-size: var(--text-2xs); letter-spacing: 0.02em;
     color: var(--fg-muted); font-weight: 400; }
   .slink__glyph { fill: var(--surface); }
+
+  /* 사진·마스코트는 링크가 아니라 탭해도 페이지가 넘어가지 않는다 — 터치에서
+     :hover 가 붙으면 기울기가 펴진 채로 굳는다. (.slink·.btn 처럼 눌러서
+     이동하는 요소는 어차피 화면이 바뀌므로 가드가 필요 없다.)
+     쉼 상태를 리터럴이 아니라 --rest-rot 으로 되돌리는 게 핵심이다: 아래
+     560px 쿼리가 .hero__photo 의 --rest-rot 을 0deg 로 덮으므로, 각도를 여기
+     박아두면 좁은 화면에서 안 기울어진 사진이 터치 후 기울어져 버린다.
+     블록 위치도 제약이다 — :hover 규칙들과 명시도가 같아서 셋보다 뒤에
+     있어야 이긴다. 위쪽 각 섹션에 흩어 두면 조용히 덮인다. */
+  @media (hover: none) {
+    .hero__photo:hover    { transform: rotate(var(--rest-rot)); }
+    .profile__photo:hover { transform: rotate(var(--rest-rot)); }
+    .social__mascot:hover { transform: rotate(var(--rest-rot)); }
+  }
 
   @media (max-width: 860px) {
     .hero__grid { grid-template-columns: 1fr; gap: var(--space-6); }
@@ -184,9 +198,8 @@
         </div>
 
         <figure class="hero__photo" data-od-id="landing-key-visual">
-          <span class="tape" aria-hidden="true">Chya ♡</span>
-          <img src="assets/kunya-debut-720.jpg" width="720" height="972" fetchpriority="high"
-               alt="챠이로 쿠냐 데뷔 카드 — 트윈테일 갈색 머리에 고양이 프린트 검은 스웨터, 레이스 미니스커트, 플랫폼 부츠 차림의 전신 일러스트" />
+          <img class="sticker" src="assets/kunya-full-720.png" width="720" height="973" fetchpriority="high"
+               alt="챠이로 쿠냐 전신 — 하트 모양으로 솟은 머리카락 한 올, 검은 리본과 흰 고양이 방울로 묶은 갈색 트윈테일, 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 회색 레이스 프릴과 검은 주름 미니스커트, 끈 달린 검은 플랫폼 부츠" />
         </figure>
       </div>
     </section>

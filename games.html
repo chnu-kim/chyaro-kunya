@@ -87,6 +87,12 @@
     transform: rotate(var(--rot, 0deg));
     transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
   .game:hover { transform: rotate(0deg) translateY(-3px); box-shadow: var(--shadow-lift); }
+  /* 카드는 링크가 아니라 탭해도 페이지가 넘어가지 않는다 — 터치에서 :hover 가
+     붙으면 기울기가 펴지고 그림자가 뜬 채로 굳으므로 쉼 상태를 되돌린다.
+     안의 삭제 버튼은 자기 :hover 를 따로 갖는다(여기 영향 없음). */
+  @media (hover: none) {
+    .game:hover { transform: rotate(var(--rot, 0deg)); box-shadow: var(--shadow-card); }
+  }
   /* The initial carries the card's identity — without it every thumb is the
      same stripe pattern and the board reads as one repeated placeholder. */
   .game__thumb { aspect-ratio: 4/3; display: grid; place-items: center; position: relative; overflow: hidden;

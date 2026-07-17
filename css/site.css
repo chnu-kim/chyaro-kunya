@@ -79,6 +79,10 @@
   --ease-paper: cubic-bezier(.2,.7,.2,1);
   --dur-fast:120ms; --dur-base:220ms;
   --tape-amber: rgba(214,196,168,.72);
+  /* 컷아웃 스티커의 다이컷 테두리. 테마를 따라가면 안 된다 — 목적이 "캐릭터의
+     검은 옷을 배경에서 떼어내는 것"이라, 다크에서 잉크로 뒤집으면 정확히 그
+     분리를 잃는다. 팔레트 스와치 테두리와 같은 이유로 테마 독립값이다. */
+  --sticker-edge: #ffffff;
 
   /* Real measured height of .nav: 12px+12px padding + 44px tallest child
      (.theme-toggle / .nav__link) + 1.5px border ≈ 70px. Sticky offsets and
@@ -249,6 +253,22 @@ h1.t-script, h2.t-script { letter-spacing: 0.01em; }
   padding: 4px 18px; box-shadow: var(--shadow-tape); }
 .clip { position: absolute; top: -10px; right: 24px; width: 20px; height: 46px;
   border: 3px solid var(--fg); border-radius: 10px; border-bottom-color: transparent; }
+
+/* 배경이 제거된 캐릭터 컷아웃 — 데뷔 원화가 이미 쓰던 언어(종이에 붙인 다이컷
+   스티커)를 그대로 가져온다. 사각 액자(border/radius/box-shadow)를 두르면
+   캐릭터 주변의 빈 알파를 액자에 넣게 되므로 쓰지 않는다.
+
+   테두리를 filter 로 만드는 게 핵심이다: drop-shadow 는 알파 실루엣을 따라가고
+   box-shadow 는 요소의 사각 박스를 따라간다 — 여기선 box-shadow 로 대체 불가능.
+   0 blur 드롭섀도 4장을 상하좌우로 겹쳐 윤곽선을 근사한다(대각은 얇아지지만
+   2px 두께에선 눈에 띄지 않는다). 마지막 한 장만 실제 접지 그림자다. */
+.sticker { display: block; width: 100%; height: auto; --sticker-w: 2px;
+  filter:
+    drop-shadow(var(--sticker-w) 0 0 var(--sticker-edge))
+    drop-shadow(calc(var(--sticker-w) * -1) 0 0 var(--sticker-edge))
+    drop-shadow(0 var(--sticker-w) 0 var(--sticker-edge))
+    drop-shadow(0 calc(var(--sticker-w) * -1) 0 var(--sticker-edge))
+    drop-shadow(0 12px 20px rgba(24,24,24,.26)); }
 
 /* ---- Photo paper — an always-light surface island ------------------------
    Polaroids and game cards model physical photo paper, so they stay light in

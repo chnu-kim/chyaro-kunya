@@ -33,17 +33,17 @@
   .home { padding: var(--space-8) 0 var(--space-9); }
   .home__hero { text-align: center; max-width: 640px; margin: 0 auto var(--space-8); }
   .home__hero .chip { margin-bottom: var(--space-5); }
-  /* Small pinned key-visual — secondary to the script headline (the screen's main flourish) */
+  /* 작은 컷아웃 스티커 — 스크립트 헤드라인이 이 화면의 플로리시이므로 부차적.
+     168px 로 렌더되니 다이컷 테두리는 landing(720px)의 2px 보다 얇아야 같은
+     굵기로 보인다. filter 는 CSS 픽셀 기준이라 이미지 원본 크기와 무관하다. */
   .home__photo { width: 168px; margin: 0 auto var(--space-6); position: relative;
     --rest-rot: -3deg; transform: rotate(var(--rest-rot));
-    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
-  .home__photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
+    transition: transform var(--dur-base) var(--ease-paper); }
+  .home__photo .sticker { --sticker-w: 1.5px; }
   .home__photo:hover { transform: rotate(0deg) translateY(-3px); }
   @media (hover: none) {
     .home__photo:hover { transform: rotate(var(--rest-rot)); }
   }
-  .home__photo .tape { z-index: 2; }
   /* Face + tracking come from .t-script. The Korean wordmark resolves to Nanum
      Pen Script through --font-script (Sacramento has no Hangul) — a handwritten
      diary title, which is the point. */
@@ -177,9 +177,8 @@
     <div class="wrap">
       <div class="home__hero" data-od-id="home-hero">
         <figure class="home__photo rise--photo" data-od-id="home-key-visual">
-          <span class="tape" aria-hidden="true">Kunya ♡</span>
-          <img src="assets/kunya-debut-336.jpg" width="336" height="454" fetchpriority="high"
-               alt="챠이로 쿠냐 데뷔 카드 — 트윈테일 갈색 머리에 고양이 프린트 검은 스웨터 차림의 전신 일러스트" />
+          <img class="sticker" src="assets/kunya-full-336.png" width="336" height="454" fetchpriority="high"
+               alt="챠이로 쿠냐 전신 — 갈색 트윈테일에 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 검은 주름 미니스커트와 플랫폼 부츠" />
         </figure>
         <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Chyaro Kunya · Fan Site</span>
         <h1 class="t-script rise" data-od-id="home-title" style="--rise-delay:240ms">챠이로 쿠냐</h1>

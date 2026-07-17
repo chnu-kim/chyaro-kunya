@@ -30,12 +30,10 @@
   .og__note { font-family: var(--font-hand); font-size: 32px; color: var(--brand-taupe);
     margin-top: 24px; transform: rotate(-1.5deg); }
 
-  .og__photo { justify-self: center; position: relative; transform: rotate(-2.5deg); margin-right: 26px; }
-  .og__photo img { display: block; width: 308px; height: auto;
-    border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
-  .og__tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-3deg);
-    background: var(--tape-amber); color: var(--brand-brown-deep); font-family: var(--font-hand);
-    font-size: 24px; padding: 3px 24px; box-shadow: var(--shadow-tape); z-index: 3; }
+  /* 캐릭터 컷아웃 스티커 — 테두리·그림자는 .sticker 가 filter 로 담당한다.
+     폭은 figure 가 잡고 이미지는 100% 로 채운다(.sticker 계약). */
+  .og__photo { justify-self: center; position: relative; width: 308px;
+    transform: rotate(-2.5deg); margin-right: 26px; }
 
   /* A stamp is pressed, not stuck on: ±2° is the whole allowance (route A rule). */
   .og__seal { position: absolute; bottom: 40px; left: 84px; width: 44px; height: 44px;
@@ -57,8 +55,7 @@
   </div>
 
   <figure class="og__photo">
-    <span class="og__tape" aria-hidden="true">Chya ♡</span>
-    <img src="assets/chyaro-kunya-debut.png" alt="" />
+    <img class="sticker" src="assets/kunya-full-720.png" alt="" />
   </figure>
 
   <!-- Brand mark · A 잉크 도장 — the watermark half of the locked A+C pair.

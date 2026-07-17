@@ -31,7 +31,9 @@
 <script>/* apply saved/system theme before first paint — no light-mode flash */try{var t=localStorage.getItem('ck-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
   .home { padding: var(--space-8) 0 var(--space-9); }
-  .home__hero { text-align: center; max-width: 640px; margin: 0 auto var(--space-8); }
+  /* position 은 아래 쿼카 낙서가 이 상자의 바깥 여백을 기준점으로 쓰기 때문이다. */
+  .home__hero { text-align: center; max-width: 640px; margin: 0 auto var(--space-8);
+    position: relative; }
   .home__hero .chip { margin-bottom: var(--space-5); }
   /* 방송 캡처 세 장을 손으로 흩어 붙인 것. 컷아웃 스티커를 대신한다 — 스티커는
      받침 종이가 없어 줄노트 위에 떠 있었고, 라이트 테마에선 흰 종이 위의 흰
@@ -177,12 +179,31 @@
   .deco-paws { display: flex; justify-content: center; align-items: center; gap: 18px;
     color: var(--brand-taupe); margin-bottom: var(--space-7);
     pointer-events: none; user-select: none; }
+  /* 쉼 각도·높이·크기를 변수로 뽑은 건 아래 등장 애니메이션 때문이다. 키프레임의
+     transform 은 일반 선언을 이기므로, 각도를 transform 에 직접 박아 두면 등장이
+     도는 동안 각도가 풀렸다가 끝에서 튕긴다 — site.css 의 rise 주석이 경고하는
+     함정이고, 사진 콜라주가 쉼 각도를 변수로 뽑아 피해 간 것과 같은 방식이다. */
   .deco-paw { width: 22px; height: 22px; flex-shrink: 0;
-    --paw-dim: 1; --paw-fade: .6; opacity: calc(var(--paw-fade) * var(--paw-dim)); }
-  .deco-paw:nth-child(1) { --paw-fade: .40; transform: rotate(-10deg) translateY(6px) scale(.94); }
-  .deco-paw:nth-child(2) { --paw-fade: .58; transform: rotate(3deg) translateY(-5px); }
-  .deco-paw:nth-child(3) { --paw-fade: .78; transform: rotate(12deg) translateY(5px) scale(1.04); }
+    --paw-dim: 1; --paw-fade: .6;
+    --rest-rot: 0deg; --rest-y: 0px; --rest-s: 1;
+    opacity: calc(var(--paw-fade) * var(--paw-dim));
+    transform: rotate(var(--rest-rot)) translateY(var(--rest-y)) scale(var(--rest-s)); }
+  .deco-paw:nth-child(1) { --paw-fade: .40; --rest-rot: -10deg; --rest-y: 6px; --rest-s: .94; --paw-delay: 420ms; }
+  .deco-paw:nth-child(2) { --paw-fade: .58; --rest-rot: 3deg; --rest-y: -5px; --paw-delay: 465ms; }
+  .deco-paw:nth-child(3) { --paw-fade: .78; --rest-rot: 12deg; --rest-y: 5px; --rest-s: 1.04; --paw-delay: 510ms; }
   [data-theme="dark"] .deco-paw { --paw-dim: .85; }
+
+  /* 발바닥은 올라오지 않고 찍힌다 — 위에서 조금 크게 내려와 제자리 크기로 앉는다.
+     도장이 종이에 닿는 방향이고, 셋이 45ms 간격으로 이어지면 발자국 리듬이 된다.
+     길이·이징은 rise 와 같은 값이라 한 언어 안에 있고 방향만 대상이 무엇인지를
+     말한다. 끝 키프레임을 비워 둔 건 요소 자신의 쉼 상태(투명도는 --paw-fade,
+     자세는 위 transform)로 안착시키기 위해서다 — 끝에 값을 적으면 그게 쉼 상태를
+     덮어쓰고 애니메이션이 끝나는 순간 툭 튄다. */
+  @keyframes paw-step {
+    from { opacity: 0;
+      transform: rotate(var(--rest-rot)) translateY(calc(var(--rest-y) - 5px))
+                 scale(calc(var(--rest-s) * 1.15)); }
+  }
 
   /* 마스코트 잉크 스티커 — 순수 장식(aria-hidden)이라 <img> 일 이유가 없다.
      src 로 두면 프리로드 스캐너가 라이트 버전을 먼저 받고 site.js 가 끝에서
@@ -196,6 +217,67 @@
     background: url('assets/kunyang-mascot-ink.png') center / contain no-repeat;
     transform: rotate(-8deg); pointer-events: none; user-select: none; opacity: 0.88; }
   [data-theme="dark"] .mascot-sticker { background-image: url('assets/kunyang-mascot.png'); }
+
+  /* 쿠냐가 그린 쿼카 낙서. 마스코트와 같은 이유로 배경 이미지고, 잉크 두 벌도
+     마스코트와 같은 값이다 — 한 화면에 붙는 손그림 둘이 서로 다른 잉크면 한 손에서
+     나온 걸로 안 보인다. 원본(482×319)에서 알파가 있는 범위만 잘라낸 190×248
+     파생본을 쓰고, 폭·높이는 그 비율 그대로다.
+
+     부품이 아니라 줄노트 여백에 건다: 카드 모서리에 맞춰 두면 "배치한 것"으로
+     읽히고, 아무것에도 안 맞은 채 여백에 있어야 "그려 둔 것"으로 읽힌다.
+
+     bottom 이 음수인 건 헤드라인을 피하려는 것이다. 이 화면의 플로리시는 스크립트
+     헤드라인 하나뿐이라 낙서가 그 높이에 나란히 서면 둘이 싸운다 — bottom 이 8 일
+     땐 실제로 49px 겹쳐 있었다. 값은 캡처에서 재서 잡았다(뷰포트 1523): 헤드라인
+     글자가 y 487 에서 끝나고 문단이 535 에서 시작하는데, −80 이면 낙서가 526..645
+     라서 헤드라인 아래 39px 부터 시작해 문단 줄 옆을 지나 발바닥 줄(706) 앞에서
+     멈춘다. 이 좌표 하나를 게이트 전 구간에 그대로 써도 되는 건 --text-5xl 이
+     clamp(3.5rem, 8vw, 5.5rem) 이라 88 ÷ 0.08 = 1100px 부터 상한에 붙박이고,
+     게이트가 그보다 위인 1280 이라 히어로의 세로 배치가 어느 폭에서든 같기
+     때문이다. 위쪽 헤드라인·문단 크기를 건드리면 이 값은 눈으로 다시 잡아야 한다.
+
+     기본값이 none 인 게 핵심이다. 이건 여백이 남을 때만 나오는 덤이지, 늘 있다가
+     좁아지면 숨는 부품이 아니다 — 규칙을 뒤집어 두면 새 화면 폭이 생겼을 때 기본이
+     "안 나온다"가 된다.
+
+     히어로(640)가 wrap(1120, 좌우 패딩 24) 안에서 가운데 서므로 한쪽 여백은
+     (min(1120,vw) − 688) / 2 이고, wrap 이 1120 에서 멈추니 이 값도 216 에서
+     멈춘다. 낙서는 그중 왼쪽 108 을 쓴다(left 108 + 폭 92 → 안쪽 16 에서 끝).
+
+     그래서 "들어가기만 하는" 지점은 여백이 108 이 되는 뷰포트 904px 인데, 게이트는
+     한참 위인 1280 이다. 빠듯하게 끼우면 낙서가 아니라 끼워넣은 게 되기 때문이다 —
+     1280 에서 여백은 이미 최대치 216 이라 낙서 왼쪽으로 108 이 그대로 빈다.
+     hover 조건이 붙은 건 폭만으로는 데스크톱을 가릴 수 없어서다: 큰 태블릿이
+     가로로 누우면 1280 을 넘지만 손가락으로 만지는 화면이다.
+     크기나 left 를 건드리면 위 계산도 다시 한다. */
+  .quokka-doodle { display: none; position: absolute; bottom: -80px; left: -108px;
+    width: 92px; height: 120px;
+    background: url('assets/quokka-doodle-ink.png') center / contain no-repeat;
+    pointer-events: none; user-select: none; opacity: 0.88; }
+  [data-theme="dark"] .quokka-doodle { background-image: url('assets/quokka-doodle.png'); }
+  @media (min-width: 1280px) and (hover: hover) {
+    .quokka-doodle { display: block; }
+  }
+
+  /* 낙서는 히어로의 나머지와 같은 값(10px · dur-base · ease-paper)으로 들어오는데
+     키프레임만 따로 둔다: 공용 rise 는 끝 키프레임에 투명도 1 을 박아 두는데 이
+     낙서의 쉼 투명도는 0.88 이라, 그대로 쓰면 1 까지 올라갔다가 끝에서 0.88 로
+     툭 떨어진다. 끝을 비우면 요소 자신의 값으로 안착한다. */
+  @keyframes doodle-in {
+    from { opacity: 0; transform: translateY(10px); }
+  }
+
+  /* 감속을 원하는 사용자에게는 아예 걸리지 않는다 — site.css 가 공용 rise 를
+     묶는 방식과 같다. 지연값은 콘텐츠 뒤에 놓는다: 마지막 카드가 360 에 앉고
+     발바닥이 420·465·510, 낙서가 560 이다. 장식이 본문보다 먼저 나오면 읽을 것도
+     없는데 눈이 먼저 그리로 간다. */
+  @media (prefers-reduced-motion: no-preference) {
+    .deco-paw { animation: paw-step var(--dur-base) var(--ease-paper) backwards;
+      animation-delay: var(--paw-delay, 0ms); }
+    .quokka-doodle { animation: doodle-in var(--dur-base) var(--ease-paper) backwards;
+      animation-delay: 560ms; }
+  }
+
   @media (max-width: 600px) {
     .mascot-sticker { width: 54px; height: 81px; right: 4px; bottom: -14px; }
   }
@@ -258,7 +340,7 @@
         <a class="nav__link" href="landing.html">소개</a>
         <a class="nav__link" href="games.html">게임</a>
       </nav>
-      <button class="theme-toggle" type="button" data-od-id="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="다크 모드로 전환">
+      <button class="theme-toggle" type="button" data-od-id="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="다크 모드">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>
       </button>
@@ -306,6 +388,7 @@
         <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Unofficial Fan Site</span>
         <h1 class="t-script rise" data-od-id="home-title" style="--rise-delay:240ms">챠이로 쿠냐</h1>
         <p class="rise" style="--rise-delay:300ms">갈색 고양이 버추얼 스트리머의 작은 다꾸 노트. <span class="t-hand" style="font-size:var(--text-xl)">어서오냥, 쿠냥이 ♡</span></p>
+        <span class="quokka-doodle" aria-hidden="true"></span>
       </div>
 
       <!-- 발바닥 트레일 — 걷는 흔적 -->

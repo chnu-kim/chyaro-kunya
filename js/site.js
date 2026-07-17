@@ -23,12 +23,18 @@
     }
   }
 
+  /* 이름은 고정하고 상태만 바꾼다. 스크린리더는 접근 이름과 상태를 이어 읽으므로
+     둘 다 상태를 따라가면 서로를 부정한다 — 이름이 "지금 누르면 무엇이 되는지"를
+     말하는 동안 상태가 눌림이라고 하면, 그 반대쪽 테마가 켜진 것으로 들린다.
+     ARIA 토글 버튼 패턴이 이름 고정을 요구하는 이유다. 이름은 무엇을 켜고 끄는지를
+     말하고 켜졌는지는 aria-pressed 만 말한다. 이름을 스크립트가 아니라 각 페이지
+     마크업에 직접 적어 두는 것도 같은 이유다 — 스크립트가 죽어도 이름은 남는다.
+     토글을 쓰는 페이지가 여럿이니 이름을 바꿀 땐 전부 같이 바꾼다. */
   function apply(theme) {
     root.setAttribute('data-theme', theme);
     var btns = document.querySelectorAll('[data-theme-toggle]');
     for (var i = 0; i < btns.length; i++) {
       btns[i].setAttribute('aria-pressed', String(theme === 'dark'));
-      btns[i].setAttribute('aria-label', theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환');
     }
     swapImages(theme);
   }

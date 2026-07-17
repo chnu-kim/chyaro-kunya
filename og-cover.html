@@ -3,8 +3,16 @@
 <head>
 <meta charset="utf-8" />
 <title>OG 커버 — 챠이로 쿠냐</title>
-<!-- Render target only: not linked from the site. Export at 1200×630 to
-     assets/og-cover.jpg to replace the current sips-composed cover.
+<!-- Render target only: not linked from the site. 이 페이지를 캡처한 것이
+     assets/og-cover.jpg 이고, 세 페이지의 소셜 카드 메타가 그 파일을 가리킨다.
+
+     교체 절차: 이 저장소엔 HTML→이미지 경로가 없어서 브라우저 캡처가 유일한
+     수단이다. 캡처엔 DPR 배율이 곱해지고 뷰포트 여백이 딸려오므로 그대로 쓰면
+     카드가 한쪽으로 치우친다. 잘라낼 상자는 원점 (0,0) 에서 1200×630 × DPR —
+     DPR 2 면 (0,0)-(2400,1260) 이다. 맞게 잘랐는지는 아래 프레임으로 검증한다:
+     inset 16px 이므로 잘라낸 이미지 안에서 갈색 테두리가 사방 16×DPR px 로
+     대칭이어야 한다(DPR 2 면 32). 카드 밖 body 는 줄 간격이 달라서(32px 대 40px)
+     눈으로도 구분된다. inset 이나 캔버스 크기를 바꾸면 이 값도 같이 바뀐다.
 
      테마를 라이트로 못박는 이유: 이 파일엔 테마 스크립트가 없어서 속성을 비워
      둬도 라이트로 떨어지지만, 그건 site.css 가 다크를 속성 선택자 하나로만 걸고

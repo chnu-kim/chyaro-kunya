@@ -115,6 +115,13 @@
      고르면 하나를 추가·삭제할 때마다 보드 전체가 다시 기울어진다. */
   var ROT   = ['-1.4deg', '0.8deg', '-0.6deg', '1.3deg', '-1deg', '0.5deg'];
   var ANGLE = ['135deg', '45deg', '160deg', '20deg', '110deg', '70deg'];
+  var PATTERNS = 4;   // games.html 의 .game__thumb[data-p="0..3"]
+
+  /* 축마다 해시를 새로 돌린다(소금을 다르게 준다). 한 해시를 >>3, >>6 으로 나눠
+     쓰면 안 된다 — id 가 'seed-0'..'seed-7' 처럼 끝 한 글자만 다를 때 h*31+c 의
+     상위 비트가 전부 같아서 축이 통째로 붕괴한다. 실측: 시드 8장이 패턴을 1종,
+     각도를 2종밖에 못 받았다. 소금을 주면 4/4 · 6/6 으로 고르게 퍼진다. */
+  function axis(id, salt, n) { return hash(id + '/' + salt) % n; }
   function hash(s) {
     var h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -123,14 +130,13 @@
 
   function card(g) {
     var st = statusOf(g.status);
-    var h  = hash(g.id);
     var initial = g.name.charAt(0);
     return '' +
-      '<figure class="polaroid game" style="--rot:' + ROT[h % ROT.length] +
-        ';--thumb-a:' + ANGLE[(h >> 3) % ANGLE.length] + '" data-id="' + esc(g.id) +
+      '<figure class="polaroid game" style="--rot:' + ROT[axis(g.id, 'rot', ROT.length)] +
+        ';--thumb-a:' + ANGLE[axis(g.id, 'ang', ANGLE.length)] + '" data-id="' + esc(g.id) +
         '" data-od-id="game-card-' + esc(g.id) + '">' +
         '<span class="clip" aria-hidden="true"></span>' +
-        '<div class="game__thumb" aria-hidden="true">' +
+        '<div class="game__thumb" data-p="' + axis(g.id, 'pat', PATTERNS) + '" aria-hidden="true">' +
           '<span class="game__initial">' + esc(initial) + '</span>' +
           '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="15" rx="5.4" ry="4.4"/><circle cx="6.5" cy="9" r="2"/><circle cx="17.5" cy="9" r="2"/><circle cx="9.4" cy="6.4" r="1.7"/><circle cx="14.6" cy="6.4" r="1.7"/></svg>' +
         '</div>' +

@@ -93,15 +93,30 @@
   @media (hover: none) {
     .game:hover { transform: rotate(var(--rot, 0deg)); box-shadow: var(--shadow-card); }
   }
-  /* The initial carries the card's identity — without it every thumb is the
-     same stripe pattern and the board reads as one repeated placeholder. */
+  /* 게임 커버 아트는 전부 남의 저작물이라 실을 수 없고, AI 로 "비슷한 걸" 만드는
+     건 더 나쁘다 — 무단 2차적저작물인 데다 실제 게임을 잘못 대표한다. 그래서
+     썸네일은 정직한 플레이스홀더로 남긴다. 대신 카드마다 정체성이 생기도록
+     해시가 패턴 4종을 고르고 그 위에 이니셜이 앉는다. 각도만 6종 돌리던 기존
+     방식은 8장에서 이미 반복이 보였다. 전부 CSS 라 요청 0 · 무게 0.
+     색은 --thumb-* 토큰(테마 독립 — 여기는 .polaroid 사진지 섬 안이다). */
   .game__thumb { aspect-ratio: 4/3; display: grid; place-items: center; position: relative; overflow: hidden;
-    background: repeating-linear-gradient(var(--thumb-a, 135deg), #f4eee9 0 9px, #ece2da 9px 18px);
-    border: 1px solid #e3d8cf; }
+    background-color: var(--thumb-paper); border: 1px solid var(--thumb-edge); }
+  .game__thumb[data-p="0"] { background-image:
+    repeating-linear-gradient(var(--thumb-a, 135deg), transparent 0 9px, var(--thumb-mark) 9px 18px); }
+  .game__thumb[data-p="1"] { background-image:
+    radial-gradient(var(--thumb-mark) 1.6px, transparent 1.7px); background-size: 13px 13px; }
+  .game__thumb[data-p="2"] { background-image:
+    linear-gradient(var(--thumb-mark) 1px, transparent 1px),
+    linear-gradient(90deg, var(--thumb-mark) 1px, transparent 1px); background-size: 16px 16px; }
+  .game__thumb[data-p="3"] { background-image:
+    repeating-linear-gradient(45deg, transparent 0 7px, var(--thumb-mark) 7px 8px),
+    repeating-linear-gradient(-45deg, transparent 0 7px, var(--thumb-mark) 7px 8px); }
+  /* 섬 안에서 --fg 는 라이트·다크 모두 잉크(#181818)로 해석되므로 생 hex 가 아니라
+     토큰으로 쓸 수 있다 — .polaroid 다크 규칙이 --fg 를 되돌려 놓기 때문이다. */
   .game__initial { font-family: var(--font-display); font-size: 46px; line-height: 1;
-    color: #181818; opacity: .82; letter-spacing: -0.02em; }
+    color: var(--fg); opacity: .82; letter-spacing: -0.02em; }
   .game__thumb svg { position: absolute; right: 7px; bottom: 6px; width: 20px; height: 20px;
-    color: #181818; opacity: .28; }
+    color: var(--fg); opacity: .28; }
   .game__body { margin: 12px 4px 0; }
   .game__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .game__name { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; color: var(--fg); }

@@ -84,6 +84,13 @@
      분리를 잃는다. 팔레트 스와치 테두리와 같은 이유로 테마 독립값이다. */
   --sticker-edge: #ffffff;
 
+  /* 게임 썸네일 플레이스홀더의 종이 톤. .polaroid 사진지 섬 안에 살아서 라이트·
+     다크 양쪽에서 같은 크림이어야 하므로 테마 독립값이다(섬 안의 --fg 처럼).
+     games.html 에 생 hex 로 박혀 있던 값을 토큰으로 올린 것. */
+  --thumb-paper: #f4eee9;
+  --thumb-mark:  #e2d6ca;
+  --thumb-edge:  #e3d8cf;
+
   /* Real measured height of .nav: 12px+12px padding + 44px tallest child
      (.theme-toggle / .nav__link) + 1.5px border ≈ 70px. Sticky offsets and
      anchor scroll-margin both derive from this instead of hand-tuned

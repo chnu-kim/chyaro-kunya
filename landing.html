@@ -127,7 +127,10 @@
   /* 발바닥 트레일과 고양이 스티커도 z 0 — 캐릭터 실루엣 뒤로 지나간다. 세로
      위치는 실루엣이 좁아지는 다리 높이에 맞춘다: 트윈테일이 퍼지는 상단에 두면
      통째로 가려져 없는 것과 같아진다. */
-  .kv__paws { position: absolute; z-index: 0; left: 6px; bottom: 12%; width: 42px; height: auto;
+  /* 48px 인 이유: 심볼이 정사각 상자로 바뀌면서 viewBox 에 여백이 붙어, 같은
+     42px 로 두면 발바닥 실측 폭이 35 → 31px 로 줄어든다. 상자가 아니라 잉크
+     기준으로 이전과 같은 크기를 내는 값이다. */
+  .kv__paws { position: absolute; z-index: 0; left: 6px; bottom: 12%; width: 48px; height: auto;
     color: var(--accent-ink); opacity: .85; }
   .kv__cat { position: absolute; z-index: 0; right: 10px; bottom: 30%; width: 34px; height: auto;
     color: var(--fg); }
@@ -360,15 +363,19 @@
       <path d="M52 2.5h9M52 9.5h9M52 16.5h9"/>
     </g>
   </symbol>
-  <!-- 발바닥 · assets/deco-paw.svg 와 같은 도형. fill 을 명시하는 이유: SVG 의
-       기본 fill 은 currentColor 가 아니라 검정이라, color 만 바꾸면 다크에서
-       종이 위에 검은 자국이 그대로 남는다. -->
-  <symbol id="mk-paw" viewBox="0 0 60 56" fill="currentColor">
-    <ellipse cx="13" cy="25" rx="5"  ry="6"   transform="rotate(-20 13 25)"/>
-    <ellipse cx="24" cy="16" rx="6"  ry="7.5" transform="rotate(-8 24 16)"/>
-    <ellipse cx="38" cy="16" rx="6"  ry="7.5" transform="rotate(8 38 16)"/>
-    <ellipse cx="49" cy="25" rx="5"  ry="6"   transform="rotate(20 49 25)"/>
-    <ellipse cx="31" cy="39" rx="18" ry="14"/>
+  <!-- 발바닥 · assets/deco-paw.svg 와 같은 도형(index.html 까지 세 곳 복제).
+       fill 을 명시하는 이유: SVG 의 기본 fill 은 currentColor 가 아니라 검정이라,
+       color 만 바꾸면 다크에서 종이 위에 검은 자국이 그대로 남는다. -->
+  <symbol id="mk-paw" viewBox="0 0 64 64" fill="currentColor">
+    <!-- 발가락과 발바닥 사이 여백(실측 최소 2.9)이 이 도형의 유일한 제약이다: 전부
+         같은 fill 이라 닿는 순간 union 으로 뭉쳐 발가락이 사라진다. 발가락폭이
+         발바닥폭의 0.44 인 이유(고양이 비율)와 발바닥 아래를 매끈하게 둔 이유는
+         assets/deco-paw.svg 주석에 있다. -->
+    <ellipse cx="22.4" cy="14.6" rx="7.4" ry="9.1" transform="rotate(-7 22.4 14.6)"/>
+    <ellipse cx="41.6" cy="14.6" rx="7.4" ry="9.1" transform="rotate(7 41.6 14.6)"/>
+    <ellipse cx="9.2"  cy="30.3" rx="7.4" ry="9.1" transform="rotate(-34 9.2 30.3)"/>
+    <ellipse cx="54.8" cy="30.3" rx="7.4" ry="9.1" transform="rotate(34 54.8 30.3)"/>
+    <path d="M32 26.4C35.3 27.8 40.4 29.8 43.2 34.1C46.3 38.7 48.9 42.6 48.8 47.5C48.7 53.3 45.6 58 40.6 58.4C37.2 58.6 34.2 57.7 32 56.1C29.8 57.7 26.8 58.6 23.4 58.4C18.4 58 15.3 53.3 15.2 47.5C15.1 42.6 17.7 38.7 20.8 34.1C23.6 29.8 28.7 27.8 32 26.4Z"/>
   </symbol>
 </svg>
 
@@ -432,13 +439,18 @@
             <span class="clip" aria-hidden="true"></span>
             <div class="kv__page">
               <span class="kv__mark t-script" aria-hidden="true">Kunya</span>
-              <!-- 걸어간 자국이라 좌우로 흔들린다. <use> 의 x/y 는 transform 뒤에
-                   덧붙는 translate 라 회전 중심 계산이 꼬인다 — translate 로 통일하고
-                   회전은 심볼 로컬 좌표(30,28) 기준으로 건다. -->
-              <svg class="kv__paws" viewBox="0 0 72 190" aria-hidden="true">
-                <use href="#mk-paw" width="60" height="56" transform="translate(12 0) rotate(-14 30 28)"/>
-                <use href="#mk-paw" width="60" height="56" transform="translate(0 66) rotate(6 30 28)"/>
-                <use href="#mk-paw" width="60" height="56" transform="translate(10 132) rotate(-8 30 28)"/>
+              <!-- 걸어간 자국이라 좌우로 흔들린다. 참조부의 x/y 좌표는 transform 뒤에
+                   덧붙는 이동이라 회전 중심 계산이 꼬인다 — 이동은 transform 으로
+                   통일하고 회전은 심볼 로컬 중심(32,32) 기준으로 건다.
+                   상자에 여유가 있는 이유: SVG 루트는 기본 overflow:hidden 이라
+                   회전으로 밖에 나간 획이 조용히 잘린다. 회전까지 계산한 실제 잉크
+                   범위는 x 1.7..73.3 · y 3.7..191.4 로 이 상자 안에 여유롭게 들어간다.
+                   그 범위에 맞춰 상자를 조이면 안 된다 — CSS 가 폭을 48px 로 고정해서,
+                   viewBox 를 줄이면 발자국이 그만큼 확대된다. 조일 거면 폭도 같이. -->
+              <svg class="kv__paws" viewBox="-2 -3 85 202" aria-hidden="true">
+                <use href="#mk-paw" width="64" height="64" transform="translate(12 0) rotate(-14 32 32)"/>
+                <use href="#mk-paw" width="64" height="64" transform="translate(0 66) rotate(6 32 32)"/>
+                <use href="#mk-paw" width="64" height="64" transform="translate(10 132) rotate(-8 32 32)"/>
               </svg>
               <svg class="kv__cat" viewBox="0 0 40 34" aria-hidden="true">
                 <path class="kv__cat-head" d="M5.5 1.5l7 5.4a19.5 19.5 0 0 1 15 0l7-5.4 1.4 10.2A15.4 15.4 0 0 1 20 33 15.4 15.4 0 0 1 4.1 11.7z"/>

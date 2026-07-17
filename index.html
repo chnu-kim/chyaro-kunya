@@ -96,7 +96,7 @@
   .deco-paws { display: flex; justify-content: center; align-items: center; gap: 18px;
     color: var(--brand-taupe); margin-bottom: var(--space-7);
     pointer-events: none; user-select: none; }
-  .deco-paw { width: 22px; height: 21px; flex-shrink: 0;
+  .deco-paw { width: 22px; height: 22px; flex-shrink: 0;
     --paw-dim: 1; --paw-fade: .6; opacity: calc(var(--paw-fade) * var(--paw-dim)); }
   .deco-paw:nth-child(1) { --paw-fade: .40; transform: rotate(-10deg) translateY(6px) scale(.94); }
   .deco-paw:nth-child(2) { --paw-fade: .58; transform: rotate(3deg) translateY(-5px); }
@@ -144,14 +144,19 @@
 <!-- 발바닥 하나를 세 번 참조한다. landing 의 같은 도형과 이름·채움 규약을 맞춘 것 —
      마크 심볼은 mk- 접두사를 쓰고, 채움은 참조하는 쪽이 아니라 심볼에 건다.
      SVG 의 기본 채움은 currentColor 가 아니라 검정이라, 참조부에서 color 만 바꾸면
-     다크 테마의 종이 위에 검은 자국이 그대로 남는다. -->
+     다크 테마의 종이 위에 검은 자국이 그대로 남는다.
+     도형의 정본은 assets/deco-paw.svg — 고칠 땐 거기와 landing 까지 세 곳이다. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <symbol id="mk-paw" viewBox="0 0 60 56" fill="currentColor">
-    <ellipse cx="13" cy="25" rx="5" ry="6" transform="rotate(-20 13 25)"/>
-    <ellipse cx="24" cy="16" rx="6" ry="7.5" transform="rotate(-8 24 16)"/>
-    <ellipse cx="38" cy="16" rx="6" ry="7.5" transform="rotate(8 38 16)"/>
-    <ellipse cx="49" cy="25" rx="5" ry="6" transform="rotate(20 49 25)"/>
-    <ellipse cx="31" cy="39" rx="18" ry="14"/>
+  <symbol id="mk-paw" viewBox="0 0 64 64" fill="currentColor">
+    <!-- 발가락과 발바닥 사이 여백(실측 최소 2.9)이 이 도형의 유일한 제약이다: 전부
+         같은 fill 이라 닿는 순간 union 으로 뭉쳐 발가락이 사라진다. 발가락폭이
+         발바닥폭의 0.44 인 이유(고양이 비율)와 발바닥 아래를 매끈하게 둔 이유는
+         assets/deco-paw.svg 주석에 있다. -->
+    <ellipse cx="22.4" cy="14.6" rx="7.4" ry="9.1" transform="rotate(-7 22.4 14.6)"/>
+    <ellipse cx="41.6" cy="14.6" rx="7.4" ry="9.1" transform="rotate(7 41.6 14.6)"/>
+    <ellipse cx="9.2"  cy="30.3" rx="7.4" ry="9.1" transform="rotate(-34 9.2 30.3)"/>
+    <ellipse cx="54.8" cy="30.3" rx="7.4" ry="9.1" transform="rotate(34 54.8 30.3)"/>
+    <path d="M32 26.4C35.3 27.8 40.4 29.8 43.2 34.1C46.3 38.7 48.9 42.6 48.8 47.5C48.7 53.3 45.6 58 40.6 58.4C37.2 58.6 34.2 57.7 32 56.1C29.8 57.7 26.8 58.6 23.4 58.4C18.4 58 15.3 53.3 15.2 47.5C15.1 42.6 17.7 38.7 20.8 34.1C23.6 29.8 28.7 27.8 32 26.4Z"/>
   </symbol>
 </svg>
 

@@ -36,9 +36,12 @@ curl -sI https://chnu-kim.github.io/chyaro-kunya/ | head -1
 
 ## 구조 — 왜 이렇게 되어 있나
 
-세 페이지(`index.html` · `landing.html` · `games.html`)는 각자 완결된 정적 문서이고,
-공유하는 건 `css/site.css` 와 `js/site.js` 둘뿐이다. 컴포넌트 시스템이 없으므로
-**nav·푸터 마크업은 세 파일에 각각 복제돼 있다** — 크롬을 고치면 세 곳을 다 고쳐야 한다.
+공개 페이지는 셋(`index.html` · `landing.html` · `games.html`)이지만, 저장소엔 내부용
+noindex 페이지(`logo-identity-directions.html` · `og-cover.html` · `paw-shape-compare.html`)도
+있어 HTML 은 모두 6개다. 공유하는 건 `css/site.css` 와 `js/site.js` 둘뿐이다. 컴포넌트
+시스템이 없으므로 **nav·푸터 마크업이 여러 HTML 에 복제돼 있다** — 크롬을 고치기 전에
+`grep -l 'js/site.js' *.html` 로 대상을 센다. 지금은 푸터·`site.js` 가 5개(`og-cover.html`
+만 예외), nav 가 4개(`paw-shape-compare.html` 만 예외) 파일에 있다.
 
 - `css/site.css` — `:root` 디자인 토큰 + 공유 크롬. **색·타입의 정본.** 생 hex 금지,
   `var(--token)` 으로만 참조. 라이트/다크 두 테마가 살아 있어서 토큰을 우회하면

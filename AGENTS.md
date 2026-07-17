@@ -24,6 +24,7 @@
 | `games.html` | 플레이한 게임 보드 (추가·삭제·상태 필터, localStorage) |
 | `logo-identity-directions.html` | 로고 아이덴티티 확정 스펙 (내부 참고용, `noindex`) |
 | `og-cover.html` | OG 커버 렌더 타깃 (사이트에서 링크하지 않음, `noindex`) |
+| `paw-shape-compare.html` | 발바닥 세로 길이 3안 비교 (내부 참고용, 링크 안 함, `noindex`) |
 
 `css/site.css` 는 세 페이지가 공유하는 토큰 + 크롬(nav·푸터·테마 토글).
 `js/site.js` 는 테마 토글·테마별 이미지 스왑·푸터 연도. `js/games.js` 는 게임 보드.

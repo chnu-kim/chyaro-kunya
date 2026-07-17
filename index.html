@@ -33,17 +33,78 @@
   .home { padding: var(--space-8) 0 var(--space-9); }
   .home__hero { text-align: center; max-width: 640px; margin: 0 auto var(--space-8); }
   .home__hero .chip { margin-bottom: var(--space-5); }
-  /* 작은 컷아웃 스티커 — 스크립트 헤드라인이 이 화면의 플로리시이므로 부차적.
-     168px 로 렌더되니 다이컷 테두리는 landing(720px)의 2px 보다 얇아야 같은
-     굵기로 보인다. filter 는 CSS 픽셀 기준이라 이미지 원본 크기와 무관하다. */
-  .home__photo { width: 168px; margin: 0 auto var(--space-6); position: relative;
-    --rest-rot: -3deg; transform: rotate(var(--rest-rot));
-    transition: transform var(--dur-base) var(--ease-paper); }
-  .home__photo .sticker { --sticker-w: 1.5px; }
-  .home__photo:hover { transform: rotate(0deg) translateY(-3px); }
+  /* 방송 캡처 세 장을 손으로 흩어 붙인 것. 컷아웃 스티커를 대신한다 — 스티커는
+     받침 종이가 없어 줄노트 위에 떠 있었고, 라이트 테마에선 흰 종이 위의 흰
+     다이컷 테두리가 보이지 않아 "오려 붙였다"는 신호가 통째로 사라졌다.
+     폴라로이드는 그 자체가 종이라 두 문제를 같이 없앤다.
+
+     크기가 절제된 이유: 이 화면의 플로리시는 아래 스크립트 헤드라인 하나이므로
+     사진 무리가 그보다 커지면 둘이 싸운다.
+
+     폭 상한 148 은 28vw 가 148 에 닿는 529px(=148/0.28) 부터, 하한 100 은
+     357px(=100/0.28) 아래에서 걸린다. 가장 좁은 360px 에서 실측 폭은
+     100.8 + 114.9 + 100.8 − 2×12.1 = 292.3px 이고, 좌우 여백 24px 을 뺀
+     312px 안에 회전 삐져나옴까지 들어간다. 겹침·중간장 배율을 건드리면 이
+     계산도 다시 한다. */
+  .home__snaps { --snap-w: clamp(100px, 28vw, 148px);
+    display: flex; justify-content: center; align-items: flex-start;
+    margin: 0 auto var(--space-6); }
+
+  /* 쉼 상태를 변수로 두는 건 아래 카드와 같은 이유다 — 각도를 transform 에 직접
+     박으면 터치 리셋이 hover·focus 까지 삼킨다. */
+  .snap { flex: 0 0 auto; width: var(--snap-w); margin: 0; padding: 7px 7px 5px;
+    box-shadow: var(--shadow-card);
+    --rest-rot: 0deg; --rest-y: 0px; --rest-z: 0;
+    z-index: var(--rest-z);
+    transform: rotate(var(--rest-rot)) translateY(var(--rest-y));
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  .snap + .snap { margin-left: calc(var(--snap-w) * -0.12); }
+  /* 가운데 장이 조금 크고 살짝 올라앉아 맨 위에 얹힌 것으로 읽힌다. 셋의 각도가
+     서로의 거울상이 아닌 것도 "손으로 붙였다"는 신호다. */
+  .snap:nth-child(1) { --rest-rot: -5deg; }
+  .snap:nth-child(2) { --rest-rot: 2deg; --rest-y: -6px; --rest-z: 2;
+    width: calc(var(--snap-w) * 1.14); }
+  .snap:nth-child(3) { --rest-rot: -2.5deg; --rest-z: 1; }
+  .snap:hover { transform: translateY(calc(var(--rest-y) - 4px));
+    box-shadow: var(--shadow-lift); z-index: 3; }
   @media (hover: none) {
-    .home__photo:hover { transform: rotate(var(--rest-rot)); }
+    .snap:hover { transform: rotate(var(--rest-rot)) translateY(var(--rest-y));
+      box-shadow: var(--shadow-card); z-index: var(--rest-z); }
   }
+
+  /* 정사각 슬롯. 사진을 갈아끼우는 계약이 여기 다 들어 있다:
+
+     1) 정사각은 CSS 가 강제한다(aspect-ratio + cover). 그래서 교체본이 16:9 든
+        세로든 상관없이 액자가 안 흔들린다 — 미리 크롭해 오지 않아도 된다.
+     2) 피사체가 가운데가 아니면 --snap-pos 로 보는 지점만 옮긴다. 이미지를 다시
+        만들 필요가 없다.
+     3) 빗금은 지우지 않고 슬롯 배경으로 남긴다. 게임 보드가 쓰는 정직한
+        플레이스홀더 언어라, 파일이 없을 때 같은 얼굴로 비어 보인다 — 같은
+        사이트에서 "사진이 없다"가 두 가지 모양으로 말해질 이유가 없다.
+
+     --thumb-* 를 생 hex 없이 쓸 수 있는 건 여기가 사진지 섬 안이라 라이트·다크
+     양쪽에서 같은 크림으로 해석되기 때문이다. */
+  .snap__slot { aspect-ratio: 1 / 1; overflow: hidden;
+    background-color: var(--thumb-paper); border: 1px solid var(--thumb-edge);
+    background-image: repeating-linear-gradient(135deg,
+      transparent 0 9px, var(--thumb-mark) 9px 18px); }
+  .snap__slot img { display: block; width: 100%; height: 100%;
+    object-fit: cover; object-position: var(--snap-pos, 50% 50%); }
+
+  /* 손글씨 캡션은 폴라로이드 기본값(25px)이 100px 짜리 종이엔 과하다. 20px 로
+     낮췄고 캡션 길이가 여기 묶여 있다 — 폰트가 늦게 오면 한글이 전각 시스템
+     폰트(~1.0em/자)로 떨어지므로 폴백 기준으로 재야 한다. 가장 좁은 종이의 안쪽
+     폭은 100 − 14(좌우 패딩) = 86px 이고, 거기 놓인 세 글자 캡션의 폴백 폭은
+     3 × 20 = 60px 이라 26px 이 남는다. 가운데 장은 1.14 배라 안쪽 폭이 100px 다.
+     캡션을 늘릴 땐 글자 수 × 20 을 이 값과 먼저 대조한다 — 네 자면 80px 로
+     이미 아슬아슬하다. */
+  .snap figcaption { font-size: var(--text-lg); line-height: 1.1; margin-top: 5px; }
+
+  /* 테이프는 라벨이 아니라 그냥 종잇조각이라 글자가 없다 — 컴포넌트 기본값은
+     글자 크기로 높이를 만들므로 여기서 직접 준다. */
+  .snap__tape { width: 44px; height: 14px; padding: 0; top: -6px; }
+  .snap:nth-child(1) .snap__tape { left: 26%; transform: translateX(-50%) rotate(-9deg); }
+  .snap:nth-child(3) .snap__tape { left: 72%; transform: translateX(-50%) rotate(7deg); }
   /* Face + tracking come from .t-script. The Korean wordmark resolves to Nanum
      Pen Script through --font-script (Sacramento has no Hangul) — a handwritten
      diary title, which is the point. */
@@ -186,10 +247,39 @@
   <main class="home" id="main" data-od-id="home">
     <div class="wrap">
       <div class="home__hero" data-od-id="home-hero">
-        <figure class="home__photo rise--photo" data-od-id="home-key-visual">
-          <img class="sticker" src="assets/kunya-full-336.png" width="336" height="454" fetchpriority="high"
-               alt="챠이로 쿠냐 전신 — 갈색 트윈테일에 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 검은 주름 미니스커트와 플랫폼 부츠" />
-        </figure>
+        <!-- 방송 캡처 세 장. 사진을 바꾸려면 assets/snap-N.jpg 를 덮어쓰기만 하면
+             된다 — 경로가 고정이라 이 파일은 건드릴 필요가 없다. 비율이 달라도
+             슬롯이 정사각으로 잘라내므로 미리 크롭하지 않아도 되고, 피사체가
+             가운데가 아니면 --snap-pos 만 준다.
+             함께 갈아야 하는 건 둘뿐이다: 손글씨 캡션과 alt. alt 는 장식이 아니라
+             내용이다 — 이 사진들이 "쿠냐 방송이 어떤 모습인가"를 말하고 있어서,
+             비워 두면 화면을 못 보는 쪽에는 히어로가 통째로 사라진다. -->
+        <div class="home__snaps rise--photo" data-od-id="home-snaps" style="--rise-delay:120ms">
+          <figure class="polaroid snap" data-od-id="home-snap-1">
+            <span class="tape snap__tape" aria-hidden="true"></span>
+            <div class="snap__slot">
+              <img src="assets/snap-1.jpg" width="400" height="400" fetchpriority="high"
+                   alt="눈을 감고 미소 짓는 쿠냐 — 검은 오프숄더 스웨터 차림으로 밤 조명이 든 방에서" />
+            </div>
+            <figcaption>굿나잇</figcaption>
+          </figure>
+          <figure class="polaroid snap" data-od-id="home-snap-2">
+            <span class="clip" aria-hidden="true"></span>
+            <div class="snap__slot">
+              <img src="assets/snap-2.jpg" width="400" height="400" fetchpriority="high"
+                   alt="분홍 리본을 달고 분홍 고양이 인형을 끌어안은 채 웃는 쿠냐" />
+            </div>
+            <figcaption>쿠냥이 ♡</figcaption>
+          </figure>
+          <figure class="polaroid snap" data-od-id="home-snap-3">
+            <span class="tape snap__tape" aria-hidden="true"></span>
+            <div class="snap__slot">
+              <img src="assets/snap-3.jpg" width="400" height="400" loading="lazy" decoding="async"
+                   alt="트윈테일을 묶고 마이크 앞에서 이야기하며 웃는 쿠냐" />
+            </div>
+            <figcaption>방송 중</figcaption>
+          </figure>
+        </div>
         <!-- 이름은 바로 아래 h1 이 말한다. 이 칩이 더할 게 있다면 h1 이 못 하는 말,
              즉 "공식이 아니다" 뿐이다. -->
         <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Unofficial Fan Site</span>

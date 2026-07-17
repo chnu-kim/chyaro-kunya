@@ -443,15 +443,22 @@
               <!-- 걸어간 자국이라 좌우로 흔들린다. 참조부의 x/y 좌표는 transform 뒤에
                    덧붙는 이동이라 회전 중심 계산이 꼬인다 — 이동은 transform 으로
                    통일하고 회전은 심볼 로컬 중심(32,32) 기준으로 건다.
+                   세로 피치가 60 인 이유: 발자국 사이 간격 = 피치 − 발 높이(46.9)
+                   다. 발바닥 세로비를 1.29 로 바꾸면서 발이 6 만큼 낮아졌는데 피치
+                   66 을 그대로 두니 간격이 13.1 → 19.1 로 벌어져 트레일이 성겼다.
+                   간격을 원래대로 되돌리는 값이 60 이다 — 발 높이를 다시 바꾸면 이
+                   값도 같이 다시 잡아야 한다.
+
                    상자에 여유가 있는 이유: SVG 루트는 기본 overflow:hidden 이라
                    회전으로 밖에 나간 획이 조용히 잘린다. 회전까지 계산한 실제 잉크
-                   범위는 x 1.7..73.3 · y 6.6..188.4 로 이 상자 안에 여유롭게 들어간다.
-                   그 범위에 맞춰 상자를 조이면 안 된다 — CSS 가 폭을 48px 로 고정해서,
-                   viewBox 를 줄이면 발자국이 그만큼 확대된다. 조일 거면 폭도 같이. -->
-              <svg class="kv__paws" viewBox="-2 -3 85 202" aria-hidden="true">
+                   범위는 x 1.7..73.3 · y 6.6..176.4 로 이 상자 안에 들어간다.
+                   폭 85 와 x 원점 −2 는 건드리지 않는다 — CSS 가 폭을 48px 로
+                   고정해서 발자국 크기는 48/85 로 정해지고, viewBox 폭을 줄이면
+                   발자국이 그만큼 확대된다. 높이만 트레일 길이에 맞춘다. -->
+              <svg class="kv__paws" viewBox="-2 -3 85 182" aria-hidden="true">
                 <use href="#mk-paw" width="64" height="64" transform="translate(12 0) rotate(-14 32 32)"/>
-                <use href="#mk-paw" width="64" height="64" transform="translate(0 66) rotate(6 32 32)"/>
-                <use href="#mk-paw" width="64" height="64" transform="translate(10 132) rotate(-8 32 32)"/>
+                <use href="#mk-paw" width="64" height="64" transform="translate(0 60) rotate(6 32 32)"/>
+                <use href="#mk-paw" width="64" height="64" transform="translate(10 120) rotate(-8 32 32)"/>
               </svg>
               <svg class="kv__cat" viewBox="0 0 40 34" aria-hidden="true">
                 <path class="kv__cat-head" d="M5.5 1.5l7 5.4a19.5 19.5 0 0 1 15 0l7-5.4 1.4 10.2A15.4 15.4 0 0 1 20 33 15.4 15.4 0 0 1 4.1 11.7z"/>

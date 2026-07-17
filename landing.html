@@ -42,17 +42,144 @@
   .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
   .hero__note { font-family: var(--font-hand); font-size: var(--text-xl); color: var(--brand-taupe);
     margin-top: var(--space-5); transform: rotate(-1.5deg); }
-  /* 캐릭터 컷아웃을 스티커로 붙인다 — 테두리·그림자는 .sticker 가 filter 로
-     담당하므로 여기선 각도와 호버만 얹는다. 테이프는 없다: 붙일 사각 모서리가
-     없어서 컷아웃 위에선 허공에 뜬다. */
+  /* 컷아웃의 다이컷 테두리·접지 그림자는 .sticker 가 filter 로 담당한다 —
+     여기선 카드 전체의 각도와 호버만 얹는다. 클립·리본이 걸칠 사각 모서리는
+     아래 .kv 액자가 만든다(컷아웃 자체엔 붙일 모서리가 없다). */
   .hero__photo { position: relative; margin: 0; --rest-rot: -2deg; transform: rotate(var(--rest-rot));
     transition: transform var(--dur-base) var(--ease-paper); }
   .hero__photo:hover { transform: rotate(0deg) translateY(-4px); }
 
+  /* ---- Key visual — 액자에 끼운 줄노트 페이지 --------------------------------
+     컷아웃만 두면 페이지 줄무늬 위에 아무 근거 없이 떠 있는다: 다이컷 테두리가
+     "어딘가에 붙은 스티커"라고 말하는데 정작 붙을 종이가 없기 때문이다. 그래서
+     붙일 바닥을 만든다 — 크라프트 액자 안에 줄노트 한 장, 그 위에 스티커.
+     여기서 나오는 클립·리본·발바닥·고양이는 전부 이미 사이트가 쓰는 어휘다. */
+  .kv { position: relative; padding: 13px; background: var(--surface-frame);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-lift); }
+  /* 룰 간격이 body(32px)보다 좁은 26px 인 이유: 카드가 페이지보다 훨씬 작아서
+     같은 간격이면 줄이 몇 개 안 들어와 노트로 안 읽힌다.
+     아래 여백이 32px 인 이유: .sticker 의 접지 그림자가 12px 내려가 20px 번지는데
+     overflow: hidden 이라 여백이 그보다 좁으면 그림자가 잘려 발밑이 잘린 것처럼
+     보인다. */
+  /* isolation 은 아래 ::after 의 mix-blend-mode 때문이다. 블렌드는 가장 가까운
+     쌓임 맥락까지 뒤를 뚫고 섞이는데, overflow: hidden 은 쌓임 맥락을 만들지
+     않으므로 그대로 두면 그레인이 액자·페이지 밖 배경까지 물들인다. */
+  .kv__page { position: relative; isolation: isolate; overflow: hidden; border-radius: 2px;
+    padding: var(--space-5) var(--space-4) var(--space-6);
+    background-color: var(--surface);
+    background-image: repeating-linear-gradient(var(--surface) 0 25px, var(--bg-rule) 25px 26px); }
+
+  /* 종이 결 — feTurbulence 한 장을 140px 타일로 반복한다. 인라인 데이터 URI 인
+     이유는 이 저장소가 에셋을 늘리지 않기 위해서고, saturate 0 이 필수인 이유는
+     feTurbulence 의 기본 출력이 RGBA 컬러 노이즈라 빼면 종이에 무지개가 낀다.
+     stitchTiles 가 없으면 타일 경계에 격자선이 보인다.
+     ::after 인 이유: 마크·발바닥·고양이(z 0)까지 덮어야 "종이 위의 잉크"로
+     읽히고, 스티커(z 1)는 별개의 종잇장이라 결이 얹히면 안 된다. 생성 순서상
+     ::after 가 z 0 무리의 맨 뒤라 그 사이에 정확히 들어간다. */
+  .kv__page::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply; opacity: .34; }
+  /* 다크에선 multiply 가 charcoal 을 검정으로 뭉갠다 — 결이 아니라 때가 된다.
+     screen 으로 뒤집어 chalk 가루처럼 밝은 쪽으로 튀게 한다. */
+  [data-theme="dark"] .kv__page::after { mix-blend-mode: screen; opacity: .15; }
+
+  .kv__img { position: relative; z-index: 1; }
+
+  /* 커서를 광원으로 삼는다 — 컷아웃이 페이지에서 몇 mm 떠 있다는 사실을 그림자
+     위치만으로 말한다. --kv-lx/ly 는 js/site.js 가 -1..1 로 채우고, 없으면 0 이라
+     기본 광원(바로 위)으로 떨어진다. 커서가 오른쪽이면 그림자는 왼쪽으로 —
+     부호가 반대인 게 핵심이다. 이미지 자체는 커서 쪽으로 4px 만 따라가 시차를
+     만든다(그림자보다 작아야 "떠 있다"로 읽힌다).
+     hover 쿼리로 감싼 이유: 터치에선 pointermove 가 탭 순간에만 와서 그림자가
+     한 번 튀고 굳는다. reduced-motion 은 전역 가드가 transition 만 죽이고 이
+     변수 추적은 못 막으므로 여기서 같이 잠근다. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .kv__img {
+      --sticker-lift-x: calc(var(--kv-lx, 0) * -9px);
+      --sticker-lift-y: calc(12px + var(--kv-ly, 0) * -5px);
+      transform: translate(calc(var(--kv-lx, 0) * 4px), calc(var(--kv-ly, 0) * 3px)); }
+  }
+
+  /* 클립·리본은 마크업상 .kv__page 보다 앞에 있고 셋 다 z-index auto 라, 그냥
+     두면 뒤에 오는 페이지가 위에 그려져 걸침이 사라진다. .kv 는 position:
+     relative 이지만 z-index 가 auto 라 쌓임 맥락을 만들지 않으므로, 여기서 준
+     z-index 가 페이지(auto=0)를 상대로 그대로 먹힌다. */
+
+  /* 클립은 액자 위(-10px)에서 시작해 아래 절반이 종이에 얹힌다 — 액자 padding 이
+     13px 이라서. .clip 기본값은 오른쪽이므로 왼쪽으로. */
+  .kv > .clip { left: 26px; right: auto; z-index: 3; }
+
+  /* 코너 리본. 잉크가 아니라 --border-strong 인 이유: 다크에서 액자가 거의
+     검정(#0d0b0a)이 되므로 잉크 리본은 액자에 먹혀 사라진다. */
+  .kv__ribbon { position: absolute; z-index: 3; top: 0; right: 0; width: 72px; height: 72px;
+    overflow: hidden; border-radius: 0 var(--radius-sm) 0 0; }
+  .kv__ribbon::after { content: ""; position: absolute; top: 11px; right: -26px;
+    width: 104px; height: 19px; background: var(--border-strong); transform: rotate(45deg);
+    box-shadow: var(--shadow-tape); }
+
+  /* 종이에 흐리게 남은 서명 — 캐릭터가 절반을 가려서 "밑에 깔린 층"으로 읽힌다.
+     z-index 0 이라 스티커(z 1) 뒤. */
+  .kv__mark { position: absolute; z-index: 0; top: 12%; left: 50%; white-space: nowrap;
+    transform: translateX(-50%) rotate(-5deg); line-height: .9; font-size: 4.25rem;
+    color: color-mix(in srgb, var(--fg-muted) 24%, transparent); }
+
+  /* 발바닥 트레일과 고양이 스티커도 z 0 — 캐릭터 실루엣 뒤로 지나간다. 세로
+     위치는 실루엣이 좁아지는 다리 높이에 맞춘다: 트윈테일이 퍼지는 상단에 두면
+     통째로 가려져 없는 것과 같아진다. */
+  .kv__paws { position: absolute; z-index: 0; left: 6px; bottom: 12%; width: 42px; height: auto;
+    color: var(--accent-ink); opacity: .85; }
+  .kv__cat { position: absolute; z-index: 0; right: 10px; bottom: 30%; width: 34px; height: auto;
+    color: var(--fg); }
+  /* 얼굴색을 SVG 속성(fill="var(--surface)")이 아니라 CSS 규칙으로 주는 이유:
+     프레젠테이션 속성 안의 var() 는 브라우저 지원이 갈려, 실패하면 기본 fill
+     인 검정으로 조용히 떨어진다 — 다크에서 눈·입이 통째로 사라지는 그 버그다. */
+  .kv__cat-head  { fill: currentColor; }
+  .kv__cat-eye   { fill: var(--surface); }
+  .kv__cat-mouth { fill: none; stroke: var(--surface); stroke-width: 1.4; stroke-linecap: round; }
+
+  /* 원본 데뷔 카드엔 오른쪽 아래에 이름표가 있지만 여기선 뺐다 — 카드가 혼자
+     서는 원본과 달리 이 카드 왼쪽엔 라틴 제목과 한글 서브헤드가 이미 있어서,
+     이름표를 살리면 한 화면에서 이름이 세 번 나오게 된다. */
+
+  /* ---- 손으로 붙였다는 감각 — 컨텐츠 카드 3장에만 -------------------------
+     처음엔 프로필 메모 7장과 채널 태그 3개까지 전부 기울였다가 걷어냈다.
+     한 화면에 기운 물건이 열 개를 넘어가는 순간 "손으로 붙였다"가 아니라
+     그냥 "정렬이 깨졌다"로 읽힌다 — DESIGN.md §9 의 "모든 카드를 기울이지
+     말 것"이 정확히 이 얘기다. 기울임은 희소해야 의미가 생긴다.
+
+     그래서 지금 각도를 갖는 건 컨텐츠 카드 셋뿐이다. 프로필처럼 읽어야 하는
+     데이터는 각도가 아니라 폭으로 흐트러뜨리고(아래 .spec), 눌러야 하는
+     버튼은 반듯해야 눌러도 된다고 말한다(아래 .slink).
+
+     --rest-rot/--nudge-y 를 리터럴 대신 변수로 두는 이유: 아래 좁은 화면
+     쿼리가 각도만 0 으로 덮어야 하는데, transform 에 직접 박으면 그 쿼리가
+     hover 까지 통째로 삼켜 좁은 창의 키보드 사용자가 lift 를 잃는다.
+
+     각도 규칙(무작위 금지):
+     ① 서로의 거울상이 아니다. 대칭이면 "배치했다", 비대칭이어야 "붙였다".
+     ② 큰 종이일수록 평평하다. 실제로 큰 종이가 더 평평하게 눕고, 넓은 카드는
+        같은 각도라도 모서리가 훨씬 크게 튀어 옆을 침범한다.
+     ③ 상한 2.2°. 넘으면 "기울었다"가 아니라 "깨졌다"로 읽힌다. */
+  .ccard { --rest-rot: 0deg; --nudge-y: 0px;
+    transform: rotate(var(--rest-rot)) translateY(var(--nudge-y));
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  /* 집으면 펴지면서 뜬다 — 종이를 집어 든 순간 각도가 사라지는 그 동작.
+     z-index 는 뜬 카드가 옆 카드 밑에 깔리지 않게 한다(.paper 가 relative). */
+  .ccard:hover { transform: rotate(0deg) translateY(calc(var(--nudge-y) - 3px));
+    box-shadow: var(--shadow-lift); z-index: 1; }
+
   /* ---- Profile spec ----------------------------------------------------- */
-  .profile { padding: var(--space-7) 0; }
+  /* 밀도 교대 — 세 섹션이 같은 padding 을 쓰면 스크롤이 메트로놈이 된다.
+     프로필은 조이고(--space-6), 컨텐츠는 크게 숨 쉬고(--space-9), 소셜은 다시
+     조인다. 이 리듬 하나가 "템플릿 세 번"을 "노트 한 권"으로 바꾼다. */
+  .profile { padding: var(--space-7) 0 var(--space-6); }
   .profile__head { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-5); flex-wrap: wrap; }
   .profile__head h2 { font-size: var(--text-3xl); }
+  /* 지난 버전엔 여기 .eyebrow 각도 규칙 4줄이 있었다. 라벨 자체를 뺐으므로
+     같이 지운다 — 아무도 안 쓰는 셀렉터를 남겨두면 "여기 라벨이 있다"고
+     거짓말하는 죽은 코드가 된다. .eyebrow 클래스 정의는 games.html 도 쓰는
+     site.css 에 그대로 있다(이 페이지만 안 쓸 뿐). */
   .profile__grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--space-7); align-items: start; }
   /* Upper-body portrait pinned as a polaroid — the section's single flourish.
      .polaroid carries the photo-paper surface + its dark-theme token island. */
@@ -62,34 +189,92 @@
   .profile__photo figcaption { margin-top: 10px; }
   .profile__photo:hover { transform: rotate(0deg) translateY(-3px); }
   .profile__photo .tape { z-index: 2; }
-  .spec { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
-  .spec__item { padding: var(--space-5); }
+  /* 6칸이 자로 잰 듯 3열로 맞아떨어지던 자리 — 이 페이지에서 제일 AI 같았다.
+     손으로 붙인 메모가 균등 그리드에 들어맞을 리 없다.
+
+     그래서 폭을 grid 가 아니라 "내용"이 정하게 둔다. flex-wrap 위에서
+     "MBTI / INFP" 는 저절로 좁고 "이름 / 챠이로 쿠냐" 는 저절로 넓다 —
+     span 숫자가 하나도 없고, 크기 차이가 곧 정보량이다. 줄바꿈도 저절로
+     너덜너덜해진다.
+
+     각도는 일부러 주지 않는다. 여기 있는 건 읽어야 하는 데이터라, 카드마다
+     기울이면 시선이 값이 아니라 각도를 먼저 읽는다. 폭만으로도 이미 균등
+     그리드가 아니고, 그게 회전보다 훨씬 조용하면서 강하게 "손"을 만든다 —
+     흐트러뜨리는 게 아니라 애초에 자로 재지 않은 것. */
+  .spec { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-4); }
+  .spec__item { flex: 0 1 auto; padding: var(--space-4) var(--space-5); }
   .spec__item dt { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-muted);
     text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
   .spec__item dd { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); }
-  .spec__item--wide { grid-column: span 3; }
-  .spec__item--wide dd { font-family: var(--font-body); font-weight: 500; font-size: var(--text-base); }
+  /* 한마디만 한 줄을 통째로 먹는다. flex-basis 100% 가 강제 줄바꿈을 만들어,
+     위의 너덜한 메모 더미와 아래 넓은 한 장이라는 대비가 생긴다. */
+  .spec__item--wide { flex: 1 1 100%; }
+  .spec__item--wide dd { font-family: var(--font-body); font-weight: 500; font-size: var(--text-base); max-width: 62ch; }
 
   /* ---- Content / 컨텐츠 ------------------------------------------------- */
-  .content { padding: var(--space-7) 0; }
-  .content__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-5); }
-  .ccard { padding: var(--space-6); }
-  .ccard__ic { width: 30px; height: 30px; color: var(--fg); margin-bottom: var(--space-3); }
-  .ccard h3 { font-size: var(--text-xl); margin-bottom: var(--space-2); }
-  .ccard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
+  .content { padding: var(--space-9) 0 var(--space-7); }
+
+  /* 균등 3열 + 카드마다 얹은 아이콘 배지 = "Features" 섹션의 교과서적 AI 골격.
+     두 군데를 바꾼다.
+
+     ① 크기가 의미를 갖는다. 저챗·종합게임은 주력이라 넓고, 노래는 본문이 직접
+        "가끔 찾아오는" 이라 말하므로 좁다. 무작위 비대칭은 AI 도 하는 짓이고,
+        근거 있는 비대칭만 디자인이 된다 — 여기선 방송 빈도가 그 근거다.
+     ② 아이콘을 위계에서 뺀다. "제목마다 아이콘 하나"는 그 자체로 슬롭 신호라,
+        30px 배지를 종이에 찍힌 큰 도장으로 내려보낸다.
+
+     flex-basis 는 최소 폭이자 줄바꿈 지점이다 — 좁아지면 320/300 이 먼저 한 줄을
+     차지하고 240 이 따라 내려온다. */
+  .content__grid { display: flex; flex-wrap: wrap; align-items: flex-start;
+    gap: var(--space-5); margin-top: var(--space-5); }
+  .ccard { padding: var(--space-6); overflow: hidden; }
+  .ccard:nth-child(1) { flex: 1 1 320px; --rest-rot: -0.8deg; --nudge-y: 0px; }
+  .ccard:nth-child(2) { flex: 1 1 300px; --rest-rot:  0.9deg; --nudge-y: 14px; }
+  .ccard:nth-child(3) { flex: 0 1 240px; --rest-rot: -1.6deg; --nudge-y: -6px; }
+
+  /* 도장은 카드 밖으로 걸쳐 나가 잘린다(위 overflow: hidden). 온전히 보이면
+     그냥 큰 아이콘으로 되돌아가고, 잘려야 "찍혔다"로 읽힌다.
+     opacity 로 죽이는 이유: 색을 새로 만들면 토큰을 우회하게 되고, --fg 는
+     라이트에선 잉크·다크에선 chalk 라 양쪽에서 알아서 뒤집힌다. */
+  .ccard__ic { position: absolute; right: -14px; bottom: -12px; width: 92px; height: 92px;
+    color: var(--fg); opacity: .12; transform: rotate(-8deg); pointer-events: none; }
+  /* h3·p 를 positioned 로 올리는 이유: 도장이 absolute 라 정적인 형제 텍스트보다
+     위 레이어에 그려진다 — 그냥 두면 워터마크가 본문을 덮는다. 같은 레이어로
+     끌어올리면 DOM 순서(도장이 먼저)대로 텍스트가 이긴다. */
+  .ccard h3 { font-size: var(--text-xl); margin-bottom: var(--space-2); position: relative; }
+  .ccard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; position: relative;
+    max-width: 34ch; }
 
   /* ---- Social ----------------------------------------------------------- */
-  .social { padding: var(--space-7) 0 var(--space-8); }
-  .social__panel { padding: var(--space-7); text-align: center; }
+  .social { padding: var(--space-6) 0 var(--space-8); }
+
+  /* text-align: center 는 이 페이지에 마지막으로 남아 있던 대칭축이었다.
+     가운데 정렬된 판은 아무리 꾸며도 "슬라이드"로 읽힌다 — 왼쪽으로 눕혀서
+     읽는 눈이 한 줄기로 흐르게 하고, 대신 마스코트를 판 밖으로 밀어낸다. */
+  .social__panel { padding: var(--space-7); text-align: left; --mascot-lane: 120px; }
+  /* 클립을 왼쪽으로 보내는 이유: 기본값이 오른쪽이라 아래 마스코트와 같은
+     모서리에서 겹친다. 둘을 반대 모서리로 갈라야 둘 다 살아난다. */
+  .social__panel > .clip { left: 28px; right: auto; }
   .social__panel h2 { font-size: var(--text-3xl); }
   .social__panel p { color: var(--fg-muted); margin: var(--space-2) 0 var(--space-6); }
-  /* Inked charcoal mascot — the panel's single flourish. The artwork sits on the
-     page surface, so it follows the page theme via a src swap in site.js. */
-  .social__mascot { display: block; width: 116px; height: auto; margin: 0 auto var(--space-4);
-    --rest-rot: -3deg; transform: rotate(var(--rest-rot));
+  /* 마스코트가 차지한 오른쪽 차선을 글이 침범하지 못하게 폭으로 예약한다.
+     차선 폭을 변수로 뺀 이유: 좁은 화면에선 마스코트도 같이 줄어드는데(아래
+     560 쿼리) 예약만 120px 로 남으면 본문이 이유 없이 일찍 접혀서, 의도가
+     아니라 버그로 읽힌다. 46ch 는 넓은 화면에서 한 줄이 읽기 좋은 길이를
+     넘지 않게 막는 상한 — min() 이라 둘 중 좁은 쪽이 이긴다. */
+  .social__panel h2, .social__panel p { max-width: min(46ch, calc(100% - var(--mascot-lane))); }
+
+  /* Inked charcoal mascot — 판에 담긴 삽화가 아니라 판 위 모서리에 걸터앉은
+     스티커. absolute 라 흐름에서 빠지므로 글은 왼쪽 끝에서 그대로 시작한다.
+     -3deg 였던 각도를 -9deg 까지 여는 건 이게 카드가 아니라 캐릭터라서다 —
+     종이는 손이 흔들린 만큼만 기울지만, 스티커는 붙인 사람 마음이다.
+     테마별 src 스왑은 site.js 가 맡는다(페이지 표면 위에 있는 아트워크). */
+  .social__mascot { position: absolute; z-index: 2; right: 18px; top: -48px;
+    width: 116px; height: auto; margin: 0;
+    --rest-rot: -9deg; transform: rotate(var(--rest-rot));
     transition: transform var(--dur-base) var(--ease-paper); }
   .social__mascot:hover { transform: rotate(0deg) translateY(-3px); }
-  .social__row { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;
+  .social__row { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: flex-start;
     list-style: none; margin: 0; padding: 0; }
   /* min-height 44: these are now real destinations, so they answer to the same
      touch-target bar as every other control on the site. */
@@ -98,6 +283,9 @@
     font-weight: 700; font-size: var(--text-sm); color: var(--fg);
     background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
     transition: transform var(--dur-fast) var(--ease-paper), box-shadow var(--dur-base); }
+  /* 채널 태그는 기울이지 않는다. 나란히 선 버튼 셋이 각자 다른 각도로 누우면
+     장난기가 아니라 오작동으로 보인다 — 누르는 물건은 반듯해야 눌러도 된다고
+     말한다. 여기 남는 유일한 움직임은 눌리는 감각(translateY)뿐이다. */
   .slink:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
   .slink:active { transform: translateY(0); box-shadow: none; }
   .slink svg { width: 18px; height: 18px; flex-shrink: 0; }
@@ -117,6 +305,16 @@
     .hero__photo:hover    { transform: rotate(var(--rest-rot)); }
     .profile__photo:hover { transform: rotate(var(--rest-rot)); }
     .social__mascot:hover { transform: rotate(var(--rest-rot)); }
+    /* 컨텐츠 카드도 같은 함정에 빠진다 — 탭하면 각도가 펴진 채로 굳어서, 손으로
+        붙였다는 감각이 만져본 자리부터 사라진다. box-shadow 까지 되돌려야
+        한다: 위 :hover 가 --shadow-lift 로 올려놓고 가면 그것도 같이 굳는다. */
+    .ccard:hover {
+      transform: rotate(var(--rest-rot)) translateY(var(--nudge-y));
+      box-shadow: var(--shadow-card); z-index: auto; }
+    /* .slink 는 target="_blank" 라 새 탭이 열려도 이 페이지가 그대로 남는다 —
+        "눌러서 이동하면 화면이 바뀌니 가드가 필요 없다"는 위 논리가 여기엔
+        적용되지 않는 유일한 예외다. 기울기를 걷어낸 뒤에도 lift 는 굳는다. */
+    .slink:hover { transform: none; box-shadow: none; }
   }
 
   @media (max-width: 860px) {
@@ -124,13 +322,22 @@
     .hero__photo { max-width: 320px; order: -1; margin: 0 auto; }
     .profile__grid { grid-template-columns: 1fr; gap: var(--space-6); }
     .profile__photo { max-width: 300px; margin: 0 auto; }
-    .spec, .content__grid { grid-template-columns: 1fr 1fr; }
+    /* .spec 과 .content__grid 를 여기서 2열로 덮던 규칙은 지웠다 — 이제 둘 다
+       flex-wrap 이라 폭이 줄면 알아서 접힌다. grid-template-columns 를 남겨두면
+       아무 일도 안 하면서 "여기 그리드가 있다"고 거짓말하는 죽은 코드가 된다. */
   }
   @media (max-width: 560px) {
     .hero { padding: var(--space-6) 0; }
-    .spec, .content__grid { grid-template-columns: 1fr; }
-    .spec__item--wide { grid-column: auto; }
     .hero__photo { --rest-rot: 0deg; margin: 0 auto; }
+    /* 좁은 화면에선 남은 각도마저 편다. 카드가 폭을 꽉 채우는 순간 기울기는
+       멋이 아니라 사고다 — 회전한 모서리가 옆 카드를 파고들고, 뷰포트 밖으로
+       삐져나가 가로 스크롤을 만든다. 흐트러짐은 여백이 있을 때만 성립한다. */
+    .ccard { --rest-rot: 0deg; --nudge-y: 0px; }
+    .spec__item, .ccard { flex: 1 1 100%; }
+    /* 마스코트도 같이 줄인다 — 좁은 판에서 116px 짜리가 위로 48px 솟으면
+       윗 섹션을 덮는다. 차선 예약도 같은 비율로 줄여야 본문이 손해를 안 본다. */
+    .social__mascot { width: 78px; top: -34px; right: 10px; }
+    .social__panel { --mascot-lane: 64px; }
   }
 </style>
 </head>
@@ -152,6 +359,16 @@
       <path d="M3 2.5h9M3 9.5h9M3 16.5h9"/>
       <path d="M52 2.5h9M52 9.5h9M52 16.5h9"/>
     </g>
+  </symbol>
+  <!-- 발바닥 · assets/deco-paw.svg 와 같은 도형. fill 을 명시하는 이유: SVG 의
+       기본 fill 은 currentColor 가 아니라 검정이라, color 만 바꾸면 다크에서
+       종이 위에 검은 자국이 그대로 남는다. -->
+  <symbol id="mk-paw" viewBox="0 0 60 56" fill="currentColor">
+    <ellipse cx="13" cy="25" rx="5"  ry="6"   transform="rotate(-20 13 25)"/>
+    <ellipse cx="24" cy="16" rx="6"  ry="7.5" transform="rotate(-8 24 16)"/>
+    <ellipse cx="38" cy="16" rx="6"  ry="7.5" transform="rotate(8 38 16)"/>
+    <ellipse cx="49" cy="25" rx="5"  ry="6"   transform="rotate(20 49 25)"/>
+    <ellipse cx="31" cy="39" rx="18" ry="14"/>
   </symbol>
 </svg>
 
@@ -183,11 +400,15 @@
     <section class="hero" aria-labelledby="hero-h1" data-od-id="landing-hero">
       <div class="wrap hero__grid">
         <div>
+          <!-- 칩 옆에 있던 손글씨 "데뷔 완료냥" 을 뺐다. 칩이 이미 날짜를 말하는데
+               그 옆에서 "지났다"고 한 번 더 말할 뿐이었고, 히어로 아래쪽에 이미
+               손글씨 메모(.hero__note)가 하나 더 있어 같은 목소리가 한 화면에 두
+               번 났다. DESIGN.md §8 의 "고양이 말투는 화면당 1회" 도 여기서
+               깨져 있었다 — 남은 한 번은 소셜 섹션의 "어디서 만날까냥". -->
           <div class="hero__kicker">
             <span class="chip chip--ink t-caps">Debut 2025.12.20</span>
-            <span class="t-hand" style="font-size:var(--text-xl);color:var(--brand-taupe)">데뷔 완료냥</span>
           </div>
-          <h1 class="hero__h1 t-script" id="hero-h1" data-od-id="landing-title">Chyaro Kunya</h1>
+          <h1 class="hero__h1 t-script" id="hero-h1" data-od-id="landing-title">Chyailo Kunya</h1>
           <p class="hero__sub">갈색 고양이 버추얼 스트리머, <strong>챠이로 쿠냐</strong></p>
           <p class="hero__lead">저챗으로 도란도란, 게임으로 와글와글, 노래로 몽글몽글. 느긋하고 다정한 INFP 고양이가 오늘도 방송에서 쿠냥이들을 기다려요.</p>
           <div class="hero__cta" data-od-id="landing-cta">
@@ -198,8 +419,29 @@
         </div>
 
         <figure class="hero__photo" data-od-id="landing-key-visual">
-          <img class="sticker" src="assets/kunya-full-720.png" width="720" height="973" fetchpriority="high"
-               alt="챠이로 쿠냐 전신 — 하트 모양으로 솟은 머리카락 한 올, 검은 리본과 흰 고양이 방울로 묶은 갈색 트윈테일, 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 회색 레이스 프릴과 검은 주름 미니스커트, 끈 달린 검은 플랫폼 부츠" />
+          <div class="kv">
+            <span class="kv__ribbon" aria-hidden="true"></span>
+            <span class="clip" aria-hidden="true"></span>
+            <div class="kv__page">
+              <span class="kv__mark t-script" aria-hidden="true">Kunya</span>
+              <!-- 걸어간 자국이라 좌우로 흔들린다. <use> 의 x/y 는 transform 뒤에
+                   덧붙는 translate 라 회전 중심 계산이 꼬인다 — translate 로 통일하고
+                   회전은 심볼 로컬 좌표(30,28) 기준으로 건다. -->
+              <svg class="kv__paws" viewBox="0 0 72 190" aria-hidden="true">
+                <use href="#mk-paw" width="60" height="56" transform="translate(12 0) rotate(-14 30 28)"/>
+                <use href="#mk-paw" width="60" height="56" transform="translate(0 66) rotate(6 30 28)"/>
+                <use href="#mk-paw" width="60" height="56" transform="translate(10 132) rotate(-8 30 28)"/>
+              </svg>
+              <svg class="kv__cat" viewBox="0 0 40 34" aria-hidden="true">
+                <path class="kv__cat-head" d="M5.5 1.5l7 5.4a19.5 19.5 0 0 1 15 0l7-5.4 1.4 10.2A15.4 15.4 0 0 1 20 33 15.4 15.4 0 0 1 4.1 11.7z"/>
+                <circle class="kv__cat-eye" cx="14" cy="18" r="1.9"/>
+                <circle class="kv__cat-eye" cx="26" cy="18" r="1.9"/>
+                <path class="kv__cat-mouth" d="M17 24.5c1.5 1.6 4.5 1.6 6 0"/>
+              </svg>
+              <img class="sticker kv__img" src="assets/kunya-full-720.png" width="720" height="973" fetchpriority="high"
+                   alt="챠이로 쿠냐 전신 — 하트 모양으로 솟은 머리카락 한 올, 검은 리본과 흰 고양이 방울로 묶은 갈색 트윈테일, 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 회색 레이스 프릴과 검은 주름 미니스커트, 끈 달린 검은 플랫폼 부츠" />
+            </div>
+          </div>
         </figure>
       </div>
     </section>
@@ -207,8 +449,14 @@
     <!-- PROFILE SPEC -->
     <section class="profile" aria-labelledby="profile-h2" data-od-id="profile">
       <div class="wrap">
+        <!-- 세 섹션 머리에 있던 영어 eyebrow 라벨(About / Contents / Follow)을
+             전부 뺐다. 각 라벨이 바로 아래 h2 를 영어로 옮긴 것뿐이라 정보가
+             아니라 리듬이었고, 그 리듬이 이 페이지에 마지막으로 남아 있던
+             템플릿 지문이었다. 섹션의 위치가 이미 섹션을 분류한다.
+             (여기에 그 마크업을 그대로 인용해 두지 않는 이유: 주석 안의 예시가
+             grep 에 잡혀서 "아직 라벨이 남아 있다"고 감사 결과를 거짓말하게
+             만든다 — 실제로 이 주석의 첫 판본이 그랬다.) -->
         <div class="profile__head">
-          <span class="eyebrow">About</span>
           <h2 id="profile-h2" data-od-id="profile-title">쿠냐 프로필</h2>
         </div>
         <div class="profile__grid">
@@ -227,7 +475,14 @@
           <div class="paper spec__item"><dt>데뷔일</dt><dd>2025.12.20</dd></div>
           <div class="paper spec__item spec__item--wide">
             <dt>한마디</dt>
-            <dd>느긋하고 감수성 풍부한 갈색 고양이. 방송에선 다정하지만 가끔 엣지있는 반전 매력 — 키치와 고딕이 한 몸에.</dd>
+            <!-- 이전 문구: "…가끔 엣지있는 반전 매력 — 키치와 고딕이 한 몸에."
+                 "키치와 고딕"은 DESIGN.md 가 이 사이트의 스타일을 부르는 이름이지
+                 팬이 아는 말이 아니다. 디자인 문서의 어휘가 사용자 카피로 새어
+                 나온 자리였고, "반전 매력"도 아무 장면을 그려주지 않았다.
+                 이 칸의 일은 페이지의 나머지가 말하지 않는 걸 말하는 것 —
+                 나이·생일·MBTI 는 위 칸들이 이미 말했으니, 여기선 다정함과
+                 엣지 사이의 낙차를 실제 방송 장면으로 보여준다. -->
+            <dd>저챗에선 한없이 다정하다가, 호러도 소울라이크도 아무렇지 않게 집어듭니다. 그 온도차가 쿠냐예요.</dd>
           </div>
         </dl>
         </div>
@@ -238,7 +493,6 @@
     <section class="content" aria-labelledby="content-h2" data-od-id="contents">
       <div class="wrap">
         <div class="profile__head">
-          <span class="eyebrow">Contents</span>
           <h2 id="content-h2" data-od-id="contents-title">주요 컨텐츠</h2>
         </div>
         <div class="content__grid" data-od-id="contents-grid">
@@ -270,7 +524,6 @@
                data-img-light="assets/kunyang-mascot-ink.png" data-img-dark="assets/kunyang-mascot.png"
                width="206" height="308" loading="lazy" decoding="async"
                alt="팬 마스코트 쿠냥이 — 박쥐 날개를 단 검은 고양이" />
-          <span class="eyebrow">Follow</span>
           <h2 id="social-h2" data-od-id="social-title">어디서 만날까냥</h2>
           <p>치지직에서 방송하고, 유튜브에 클립 올리고, X로 소식 전해요.</p>
           <!-- A real <ul>/<li> rather than role="list"/role="listitem": putting
@@ -312,7 +565,7 @@
         <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
         <span class="brand__name">챠이로 쿠냐</span>
       </div>
-      <small>© <span data-year>2026</span> Chyaro Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
+      <small>© <span data-year>2026</span> Chyailo Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
       <img class="foot__mascot" src="assets/kunyang-mascot.png" width="206" height="308"
            alt="" aria-hidden="true" loading="lazy" decoding="async" />
     </div>

@@ -51,21 +51,25 @@
   .home__hero p { color: var(--fg-muted); font-size: var(--text-lg); margin-top: var(--space-3); }
 
   .cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  /* 쉼 상태를 --rest-rot/--rest-y 로 두는 게 핵심이다. 각도를 transform 에 직접
+     박으면 아래 좁은-화면 쿼리가 transform 을 덮을 때 hover·active 까지 같이
+     삼켜서, 좁은 창의 키보드 사용자가 lift 를 통째로 잃는다. 변수로 두면 쿼리는
+     쉼 상태만 0 으로 덮고 상호작용 규칙은 하나로 유지된다. */
   .navcard { display: block; text-decoration: none; color: inherit; padding: var(--space-7);
+    --rest-rot: 0deg; --rest-y: 0px;
+    transform: rotate(var(--rest-rot)) translateY(var(--rest-y));
     transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
-  .navcard:nth-child(1) { transform: rotate(-1deg); }
-  .navcard:nth-child(2) { transform: rotate(1deg); }
+  /* 손으로 붙인 두 장이라 각도가 서로의 거울상이 아니다 — 왼쪽 장이 더 많이
+     틀어진 채 살짝 내려앉고, 오른쪽은 거의 반듯하다. 세로 오프셋을 왼쪽에만
+     주는 건 오른쪽 카드 아래 모서리에 마스코트 스티커가 붙어 있어서다. */
+  .navcard:nth-child(1) { --rest-rot: -1.6deg; --rest-y: 9px; }
+  .navcard:nth-child(2) { --rest-rot: .6deg; }
   .navcard:hover,
-  .navcard:focus-visible { transform: rotate(0deg) translateY(-4px); box-shadow: var(--shadow-lift); }
-  .navcard:active { transform: rotate(0deg) translateY(0px); box-shadow: var(--shadow-card); }
+  .navcard:focus-visible { transform: translateY(calc(var(--rest-y) - 4px)); box-shadow: var(--shadow-lift); }
+  .navcard:active { transform: translateY(var(--rest-y)); box-shadow: var(--shadow-card); }
   .navcard__ic { width: 44px; height: 44px; color: var(--fg); margin-bottom: var(--space-4); }
   .navcard h2 { font-size: var(--text-2xl); margin-bottom: var(--space-2); }
-  .navcard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0 0 var(--space-4); }
-  .navcard__go { font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm);
-    display: inline-flex; align-items: center; gap: 6px; color: var(--accent-ink); }
-  .navcard__go svg { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-paper); }
-  .navcard:hover .navcard__go svg,
-  .navcard:focus-visible .navcard__go svg { transform: translateX(4px); }
+  .navcard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
 
   /* Two columns only once a card can hold a readable measure. At 640px each
      card is 280px wide and 48px of padding leaves 184px of text — about 13
@@ -74,16 +78,13 @@
      the collage rotation and tightens the padding. */
   @media (max-width: 760px) {
     .cards { grid-template-columns: 1fr; }
+    /* 세로 오프셋은 "나란히 붙인 두 장" 을 표현하는 값이라 1열에선 의미가 없다 —
+       위아래로 쌓이면 그냥 카드 간격이 어긋난 것으로 보인다. */
+    .navcard:nth-child(1) { --rest-y: 0px; }
   }
   @media (max-width: 600px) {
     .navcard { padding: var(--space-5); }
-    .navcard:nth-child(1), .navcard:nth-child(2) { transform: none; }
-    /* Same specificity as the resting rule above and declared after it, so the
-       interaction states must be re-stated here or `transform: none` swallows
-       them — a keyboard user in a narrow window would lose the lift entirely. */
-    .navcard:hover,
-    .navcard:focus-visible { transform: translateY(-4px); }
-    .navcard:active { transform: translateY(0); }
+    .navcard:nth-child(1), .navcard:nth-child(2) { --rest-rot: 0deg; }
   }
 
   /* 발바닥 트레일 — 카드 쪽으로 걸어간 자국.
@@ -180,7 +181,9 @@
           <img class="sticker" src="assets/kunya-full-336.png" width="336" height="454" fetchpriority="high"
                alt="챠이로 쿠냐 전신 — 갈색 트윈테일에 날개 달린 흰 고양이가 프린트된 검은 오프숄더 스웨터, 검은 주름 미니스커트와 플랫폼 부츠" />
         </figure>
-        <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Chyaro Kunya · Fan Site</span>
+        <!-- 이름은 바로 아래 h1 이 말한다. 이 칩이 더할 게 있다면 h1 이 못 하는 말,
+             즉 "공식이 아니다" 뿐이다. -->
+        <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Unofficial Fan Site</span>
         <h1 class="t-script rise" data-od-id="home-title" style="--rise-delay:240ms">챠이로 쿠냐</h1>
         <p class="rise" style="--rise-delay:300ms">갈색 고양이 버추얼 스트리머의 작은 다꾸 노트. <span class="t-hand" style="font-size:var(--text-xl)">어서오냥, 쿠냥이 ♡</span></p>
       </div>
@@ -194,12 +197,24 @@
 
       <div class="cards-outer rise" style="--rise-delay:360ms">
         <div class="cards" data-od-id="home-nav-cards">
+          <!-- 카드 전체가 <a> 다. 안에 "보러가기 →" 를 또 두면 링크 안의 가짜 링크가
+               되고, 목적지가 다른 두 카드가 같은 라벨을 달게 된다. 목적지 이름은
+               h2 가 말하고, 눌린다는 신호는 hover·focus lift 와 커서가 맡는다. -->
           <a class="paper navcard" href="landing.html" data-od-id="nav-card-about">
             <span class="tape" aria-hidden="true">쿠냐 ♡</span>
-            <svg class="navcard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+            <!-- 사람 실루엣이 아니라 고양이 얼굴인 이유: 이 사이트의 아이콘 언어는
+                 고양이·발바닥·카오모지다(AGENTS.md §3). 눈은 h 0.01 짜리 선분에
+                 stroke-linecap: round 를 걸어 점으로 만든다 — 옆 게임패드 아이콘이
+                 이미 쓰는 관용구라 두 아이콘의 획이 같은 손에서 나온 것처럼 보인다. -->
+            <svg class="navcard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="14" r="7.2"/>
+              <path d="M6.8 9.6 5.2 3.6l5.2 3.3M17.2 9.6l1.6-6-5.2 3.3"/>
+              <path d="M9.5 13h.01M14.5 13h.01"/>
+              <path d="M12 15.8v.7"/>
+              <path d="M12 16.5c-.6 1.1-2.2 1.1-2.6-.2M12 16.5c.6 1.1 2.2 1.1 2.6-.2"/>
+            </svg>
             <h2>소개</h2>
-            <p>프로필·캐릭터 설정·주요 컨텐츠·소셜 링크까지. 쿠냐가 누구인지 한 장에.</p>
-            <span class="navcard__go">보러가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            <p>영원한 20살 INFP 고양이. 프로필과 저챗·게임·노래 이야기, 그리고 채널 세 곳.</p>
           </a>
 
           <a class="paper navcard" href="games.html" data-od-id="nav-card-games">
@@ -207,7 +222,6 @@
             <svg class="navcard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7" width="19" height="10.5" rx="3.5"/><path d="M7.5 11v3M6 12.5h3M15.5 11.5h.01M18 13.5h.01"/></svg>
             <h2>플레이 게임</h2>
             <p>방송에서 플레이한 게임 보드. 직접 추가·삭제하고 상태로 골라볼 수 있어요.</p>
-            <span class="navcard__go">보러가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         </div>
         <span class="mascot-sticker" aria-hidden="true"></span>
@@ -221,7 +235,7 @@
         <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
         <span class="brand__name">챠이로 쿠냐</span>
       </div>
-      <small>© <span data-year>2026</span> Chyaro Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
+      <small>© <span data-year>2026</span> Chyailo Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
       <img class="foot__mascot" src="assets/kunyang-mascot.png" width="206" height="308"
            alt="" aria-hidden="true" loading="lazy" decoding="async" />
     </div>

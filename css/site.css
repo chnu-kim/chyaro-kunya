@@ -1,5 +1,5 @@
 /* ============================================================================
-   챠이로 쿠냐 (Chyaro Kunya) 팬 사이트 — 공통 스타일시트
+   챠이로 쿠냐 (Chyailo Kunya) 팬 사이트 — 공통 스타일시트
    스크랩북 디자인 시스템(Sweet Kitsch × Gothic Punk) 토큰 + 컴포넌트.
    토큰 출처: design-system colors_and_type.css 를 인라인 바인딩.
 
@@ -269,13 +269,19 @@ h1.t-script, h2.t-script { letter-spacing: 0.01em; }
    box-shadow 는 요소의 사각 박스를 따라간다 — 여기선 box-shadow 로 대체 불가능.
    0 blur 드롭섀도 4장을 상하좌우로 겹쳐 윤곽선을 근사한다(대각은 얇아지지만
    2px 두께에선 눈에 띄지 않는다). 마지막 한 장만 실제 접지 그림자다. */
+/* 접지 그림자만 --sticker-lift-* 로 열어둔 이유: 광원 위치를 바꿀 수 있는 건
+   이 마지막 한 장뿐이다. 앞의 네 장은 테두리라 오프셋이 곧 선 두께이므로
+   움직이면 윤곽선이 한쪽만 굵어진다. 기본값은 고정 광원(위 12px)이라 이 변수를
+   건드리지 않는 화면은 이전과 픽셀 단위로 같다. */
 .sticker { display: block; width: 100%; height: auto; --sticker-w: 2px;
+  --sticker-lift-x: 0px;
+  --sticker-lift-y: 12px;
   filter:
     drop-shadow(var(--sticker-w) 0 0 var(--sticker-edge))
     drop-shadow(calc(var(--sticker-w) * -1) 0 0 var(--sticker-edge))
     drop-shadow(0 var(--sticker-w) 0 var(--sticker-edge))
     drop-shadow(0 calc(var(--sticker-w) * -1) 0 var(--sticker-edge))
-    drop-shadow(0 12px 20px rgba(24,24,24,.26)); }
+    drop-shadow(var(--sticker-lift-x) var(--sticker-lift-y) 20px rgba(24,24,24,.26)); }
 
 /* ---- Photo paper — an always-light surface island ------------------------
    Polaroids and game cards model physical photo paper, so they stay light in

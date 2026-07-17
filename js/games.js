@@ -99,9 +99,10 @@
   var filters   = document.getElementById('filters');
   var statusEl  = document.getElementById('liveStatus');
   var storeWarn = document.getElementById('storeWarn');
-  var undoBar   = document.getElementById('undoBar');
-  var undoMsg   = document.getElementById('undoMsg');
-  var undoBtn   = document.getElementById('undoBtn');
+  var addOpen   = document.getElementById('addOpen');
+  var addClose  = document.getElementById('addClose');
+  var dialog    = document.getElementById('addDialog');
+  var addStatus = document.getElementById('addStatus');
 
   grid.setAttribute('tabindex', '-1');
   if (!storageOK && storeWarn) storeWarn.hidden = false;
@@ -131,11 +132,19 @@
     return Math.abs(h);
   }
 
+  /* 카드는 그림이 아니라 데이터라 평범한 div 다. 이전엔 그림+캡션 요소로 짜여
+     있었는데 관계가 뒤집혀 있었다 — 그림 몫인 썸네일은 aria-hidden 이고 제목·
+     메타·삭제가 전부 캡션 쪽에 들어가서, 콘텐츠는 없고 캡션만 있는 그림이 됐다.
+     부수 효과도 있었다: site.css 의 사진지 부품이 캡션 요소에 가운데 정렬을
+     물려서 삭제 버튼만 이유 없이 가운데 서 있었다(이름·메타는 왼쪽인데).
+     이제 왼쪽으로 정렬된다.
+     data-card 는 render() 가 갈아끼울 대상 표시다 — 붙이기 슬롯과 폼은 같은
+     그리드의 정적 자식이라 이 표시가 없어야 살아남는다. */
   function card(g) {
     var st = statusOf(g.status);
     var initial = g.name.charAt(0);
     return '' +
-      '<figure class="polaroid game" style="--rot:' + ROT[axis(g.id, 'rot', ROT.length)] +
+      '<div class="polaroid game" data-card style="--rest-rot:' + ROT[axis(g.id, 'rot', ROT.length)] +
         ';--thumb-a:' + ANGLE[axis(g.id, 'ang', ANGLE.length)] + '" data-id="' + esc(g.id) +
         '" data-od-id="game-card-' + esc(g.id) + '">' +
         '<span class="clip" aria-hidden="true"></span>' +
@@ -143,7 +152,7 @@
           '<span class="game__initial">' + esc(initial) + '</span>' +
           '<svg><use href="#mk-paw"/></svg>' +
         '</div>' +
-        '<figcaption class="game__body">' +
+        '<div class="game__body">' +
           '<div class="game__top">' +
             '<h3 class="game__name">' + esc(g.name) + '</h3>' +
             '<span class="chip ' + st.cls + '">' + esc(st.label) + '</span>' +
@@ -153,16 +162,66 @@
             '<div><dt>플랫폼</dt><dd>' + esc(g.platform) + '</dd></div>' +
           '</dl>' +
           '<button class="game__del" type="button" data-del="' + esc(g.id) + '" aria-label="' + esc(g.name) + ' 삭제">삭제</button>' +
-        '</figcaption>' +
-      '</figure>';
+        '</div>' +
+      '</div>';
+  }
+
+  /* 사진을 뗀 자리. 카드가 있던 그 칸에 들어서므로 되돌리기가 "무엇을"
+     되돌리는지 위치가 말해준다 — 그리드 위에 얹히던 별도 바는 사라진 물건과
+     떨어져 있어서 정작 그게 뭔지 설명이 필요했다. */
+  function ghostCard(g, fresh) {
+    return '' +
+      '<div class="polaroid game game--ghost' + (fresh ? ' game--settling' : '') +
+        '" data-card data-od-id="game-ghost">' +
+        '<div class="game__thumb" aria-hidden="true"></div>' +
+        '<div class="game__body">' +
+          '<p class="game__ghost-msg">‘' + esc(g.name) + '’ 뗐어요.</p>' +
+          '<button class="game__undo" type="button" data-undo data-od-id="undo-restore">되돌리기</button>' +
+        '</div>' +
+      '</div>';
   }
 
   function announce(msg) { if (statusEl) statusEl.textContent = msg; }
 
+  // ---- 삭제 되돌리기 -------------------------------------------------------
+  var pending   = null;  // { game, index } — 아직 확정되지 않은 삭제 한 건
+  var undoTimer = null;
+  /* 유령이 "방금" 생겼는지. render() 는 카드를 매번 새로 만들므로, 이 표시가
+     없으면 되돌리기가 떠 있는 동안 필터를 누를 때마다 유령이 다시 가라앉는다 —
+     아무 일도 안 났는데 일어났다고 말하는 모션이다. 삭제 직후 한 번만 켜고
+     그 렌더에서 소비한다. */
+  var ghostFresh = false;
+
+  /* 유령이 들어설 자리를 현재 필터 기준으로 다시 센다. pending.index 는 삭제
+     직전 state 에서의 위치인데, 그 앞쪽 원소들은 splice 후에도 그대로라 그중
+     필터를 통과하는 개수가 곧 화면상의 위치다. 필터가 유령 자신을 걸러내면
+     보여줄 자리가 없다(-1). */
+  function ghostIndex() {
+    if (filter !== 'all' && pending.game.status !== filter) return -1;
+    var n = 0;
+    for (var i = 0; i < pending.index && i < state.length; i++) {
+      if (filter === 'all' || state[i].status === filter) n++;
+    }
+    return n;
+  }
+
   function render(announceMsg) {
     var list = state.filter(function (g) { return filter === 'all' || g.status === filter; });
-    grid.innerHTML = list.map(card).join('');
-    empty.hidden = list.length > 0;
+    var html = list.map(card);
+    var gi = pending ? ghostIndex() : -1;
+    if (gi !== -1) html.splice(gi, 0, ghostCard(pending.game, ghostFresh));
+    // 켜졌든 아니든 여기서 끈다 — 이 렌더 한 번만 "방금"이다.
+    ghostFresh = false;
+
+    // innerHTML 로 통째로 갈아엎을 수 없다 — 붙이기 슬롯과 폼이 같은 그리드에
+    // 정적 자식으로 산다. 카드만 걷어내고 뒤에 다시 붙인다.
+    var old = grid.querySelectorAll('[data-card]');
+    for (var k = 0; k < old.length; k++) old[k].parentNode.removeChild(old[k]);
+    grid.insertAdjacentHTML('beforeend', html.join(''));
+
+    // 유령도 칸을 차지하므로 빈 화면이 아니다. 카운트에는 안 넣는다 — 뗀 물건은
+    // 이미 목록에서 빠졌고, 되돌리기 전까진 없는 게 사실이다.
+    empty.hidden = html.length > 0;
     // 보드가 통째로 비었나(사용자가 다 지웠다), 아니면 필터가 걸러냈나.
     var boardEmpty = state.length === 0;
     if (emptyFor.board)  emptyFor.board.hidden  = !boardEmpty;
@@ -177,44 +236,55 @@
     if (announceMsg) announce(announceMsg);
   }
 
-  // ---- 삭제 되돌리기 -------------------------------------------------------
-  var pending = null;  // { game, index }
-  var undoTimer = null;
+  function ghostBtn() { return grid.querySelector('[data-undo]'); }
 
-  function clearUndo() {
-    if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+  /* 포커스를 받을 요소가 사라졌을 때 보드로 되돌리는 자리. preventScroll 이
+     필수다: 보드는 화면 하나를 통째로 차지하는 컨테이너라, 그냥 focus() 하면
+     브라우저가 보드 top 을 뷰포트로 끌어온다. 페이지 맨 위에서 삭제하고
+     되돌리면 화면이 저 혼자 아래로 내려가던 게 이거였다. 포커스는 여기 있어야
+     맞지만 시선까지 옮길 이유는 없다. */
+  function focusGrid() { grid.focus({ preventScroll: true }); }
+  function clearUndoTimer() { if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } }
+
+  function forgetUndo() {
+    clearUndoTimer();
+    if (!pending) return;
+    // 되돌리기 버튼에 포커스가 남은 채로 지우면 포커스가 <body> 로 떨어진다.
+    var hadFocus = document.activeElement === ghostBtn();
     pending = null;
-    if (!undoBar || undoBar.hidden) return;
-    // 되돌리기 버튼에 포커스가 남은 채로 숨기면 포커스가 <body> 로 떨어진다.
-    var hadFocus = document.activeElement === undoBtn;
-    undoBar.hidden = true;
-    if (hadFocus) grid.focus();
+    render();
+    if (hadFocus) focusGrid();
   }
 
-  function offerUndo(game, index) {
-    pending = { game: game, index: index };
-    undoMsg.textContent = '‘' + game.name + '’ 삭제했어요.';
-    undoBar.hidden = false;
-    undoBtn.focus();
-    if (undoTimer) clearTimeout(undoTimer);
+  function armUndoTimer() {
+    clearUndoTimer();
     // 자동 해제는 사용자가 이 버튼을 보고 있지 않을 때만. 되돌릴지 고민하는
     // 중에 시간이 다 됐다는 이유로 포커스를 빼앗는 건 예고 없는 맥락 전환이다.
+    //
+    // hasFocus() 가 함께 필요하다: 창이 백그라운드로 가도 activeElement 는 그
+    // 버튼에 남는다. 버튼 조건만 보면 탭을 떠난 뒤에도 8초마다 영원히 재무장해
+    // 아무도 안 보는 타이머 체인이 끝나지 않는다. 창을 떠난 사람은 고민 중이
+    // 아니므로 그때는 확정한다.
     var tick = function () {
-      if (document.activeElement === undoBtn) { undoTimer = setTimeout(tick, 8000); return; }
-      clearUndo();
+      if (document.hasFocus() && document.activeElement === ghostBtn()) {
+        undoTimer = setTimeout(tick, 8000);
+        return;
+      }
+      forgetUndo();
     };
     undoTimer = setTimeout(tick, 8000);
   }
 
-  undoBtn.addEventListener('click', function () {
+  function doUndo() {
     if (!pending) return;
     var g = pending.game, at = Math.min(pending.index, state.length);
     state.splice(at, 0, g);
     save(state);
-    clearUndo();
+    clearUndoTimer();
+    pending = null;
     render('‘' + g.name + '’ 복구했어요.');
-    grid.focus();
-  });
+    focusGrid();
+  }
 
   // 필터
   filters.addEventListener('click', function (e) {
@@ -227,9 +297,14 @@
       : b.textContent.trim() + ' ' + list.length + '개 표시');
   });
 
-  // 삭제
+  // 삭제 · 되돌리기 — 둘 다 그리드 안에서 나므로 한 리스너가 받는다.
   grid.addEventListener('click', function (e) {
-    var b = e.target && e.target.closest && e.target.closest('[data-del]');
+    var t = e.target;
+    if (!t || !t.closest) return;
+
+    if (t.closest('[data-undo]')) { doUndo(); return; }
+
+    var b = t.closest('[data-del]');
     if (!b) return;
     var id = b.getAttribute('data-del');
     var at = -1;
@@ -237,8 +312,18 @@
     if (at < 0) return;
     var removed = state.splice(at, 1)[0];
     save(state);
+    // 앞선 삭제가 아직 안 정해졌으면 그건 확정된다 — 유령은 한 번에 하나다.
+    clearUndoTimer();
+    pending = { game: removed, index: at };
+    ghostFresh = true;   // 이 렌더의 유령만 가라앉는다
     render();
-    offerUndo(removed, at);
+    // 누른 버튼이 방금 사라져 포커스가 <body> 로 떨어진다. 같은 자리에 들어선
+    // 유령의 되돌리기로 넘기면 손이 있던 곳에 그대로 머문다.
+    var gb = ghostBtn();
+    // 유령은 방금 누른 삭제 버튼이 있던 자리라 이미 눈앞이다. 그래도 같은
+    // 이유로 스크롤은 막는다 — 자리만 맞으면 됐지 화면이 움직일 일은 아니다.
+    if (gb) gb.focus({ preventScroll: true }); else focusGrid();
+    armUndoTimer();
   });
 
   // 추가
@@ -253,7 +338,9 @@
     }
     nameIn.removeAttribute('aria-invalid');
     nameErr.hidden = true;
-    clearUndo();
+    // 붙이는 순간 앞선 삭제는 확정된다 — 아래 render() 가 유령을 지운다.
+    clearUndoTimer();
+    pending = null;
 
     var status = document.getElementById('f-status').value;
     var g = coerce({
@@ -272,11 +359,51 @@
     // 방금 추가한 카드가 현재 필터에서 안 보이면 그대로 두는 대신 전체로 되돌린다.
     if (filter !== 'all' && filter !== g.status) filter = 'all';
     render('‘' + g.name + '’ 추가했어요.');
+    // 카드가 열려 있는 동안 바깥은 inert 라 #liveStatus 가 안 읽히고, 보드도
+    // 스크림에 가려 새 카드가 내려앉는 게 안 보인다. 붙었다는 사실은 카드 안에서
+    // 말한다 — 위 render() 의 인자는 닫은 뒤 화면을 읽는 경로를 위해 남긴다.
+    addStatus.textContent = '‘' + g.name + '’ 붙였어요. 총 ' + state.length + '개.';
     nameIn.focus();
   });
 
   nameIn.addEventListener('input', function () {
     if (nameIn.value.trim()) { nameIn.removeAttribute('aria-invalid'); nameErr.hidden = true; }
+  });
+
+  // ---- 붙이기 카드 열기/닫기 -----------------------------------------------
+  /* 빈 칸을 눌러 카드를 집어 들고, 붙이면 보드에 내려앉는다. showModal 이
+     포커스 트랩·Esc·뒤 배경 inert·백드롭·닫을 때 포커스 복원까지 전부 맡으므로
+     여기서 손으로 해야 하는 건 폼 상태를 비우는 것뿐이다. */
+  addOpen.addEventListener('click', function () { dialog.showModal(); });
+  addClose.addEventListener('click', function () { dialog.close(); });
+
+  /* 바깥을 눌러 닫기는 showModal 이 주지 않는다 — 백드롭은 ::backdrop 이라
+     따로 누를 요소가 없고, 백드롭 클릭은 다이얼로그 자신을 target 으로 온다.
+     그래서 "target 이 dialog 면 닫기"로는 부족하다: 카드 안쪽이라도 패딩 위를
+     누르면 똑같이 dialog 가 target 이라 카드가 자기 여백에서 닫힌다.
+     좌표를 카드 사각형과 대조해 정말 바깥인지 본다.
+     누른 곳과 뗀 곳을 둘 다 보는 이유: 입력값을 드래그로 선택하다 카드 밖에서
+     손을 떼면 click 은 dialog 로 올라온다. 그때 닫으면 적던 게 사라진다. */
+  function onBackdrop(e) {
+    if (e.target !== dialog) return false;   // 자식 위였으면 자식이 target 이다
+    var r = dialog.getBoundingClientRect();
+    return e.clientX < r.left || e.clientX > r.right ||
+           e.clientY < r.top  || e.clientY > r.bottom;
+  }
+  var downOutside = false;
+  dialog.addEventListener('pointerdown', function (e) { downOutside = onBackdrop(e); });
+  dialog.addEventListener('click', function (e) {
+    if (downOutside && onBackdrop(e)) dialog.close();
+    downOutside = false;
+  });
+
+  // Esc 로도 닫히므로 버튼 경로와 별개로 여기서 비운다 — 다음에 열었을 때
+  // 지난번 입력과 "붙였어요" 가 남아 있으면 안 된다.
+  dialog.addEventListener('close', function () {
+    form.reset();
+    nameIn.removeAttribute('aria-invalid');
+    nameErr.hidden = true;
+    addStatus.textContent = '';
   });
 
   render();

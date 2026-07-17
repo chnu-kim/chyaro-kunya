@@ -39,25 +39,6 @@
   .head__lead { color: var(--fg-muted); margin: var(--space-3) 0 0; max-width: 60ch; }
 
   .board { padding-bottom: var(--space-9); }
-  .board__grid { display: grid; grid-template-columns: 340px minmax(0,1fr); gap: var(--space-6); align-items: start; }
-
-  /* ---- Add form (sticky composer) -------------------------------------- */
-  .composer { padding: var(--space-6); position: sticky; top: calc(var(--nav-h) + var(--space-3)); }
-  .composer h2 { font-size: var(--text-xl); margin-bottom: var(--space-2); }
-  .composer p.hint { color: var(--fg-muted); font-size: var(--text-xs); margin: 0 0 var(--space-5); }
-  .field-row { margin-bottom: var(--space-4); }
-  .field-row label { display: block; font-size: var(--text-sm); font-weight: 700; margin-bottom: 6px; }
-  .field, .select { width: 100%; box-sizing: border-box; font-family: var(--font-body); font-size: var(--text-base);
-    padding: 10px 12px; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--fg); }
-  .field:focus, .select:focus { outline: 0; border-color: var(--focus); box-shadow: 0 0 0 2px var(--focus); }
-  .field[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 35%, transparent); }
-  .err { color: var(--danger); font-size: var(--text-xs); margin: 6px 0 0; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-  .composer .btn--primary { width: 100%; justify-content: center; margin-top: var(--space-2); }
-  /* Shown only if localStorage is unavailable — the page promises persistence,
-     so it must retract that promise rather than silently drop writes. */
-  .storewarn { margin: var(--space-4) 0 0; padding: 10px 12px; font-size: var(--text-xs);
-    color: var(--danger); border: 1.5px dashed var(--danger); border-radius: var(--radius-sm); }
 
   /* ---- Filters ---------------------------------------------------------- */
   .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
@@ -68,31 +49,229 @@
   .fchip:hover { color: var(--fg); border-color: var(--fg); }
   .fchip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 
-  /* ---- Undo bar --------------------------------------------------------- */
-  .undo { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
-    padding: 10px var(--space-4); margin-bottom: var(--space-4);
-    background: var(--surface); border: 1.5px solid var(--border-strong);
-    border-radius: var(--radius-sm); box-shadow: var(--shadow-cut); font-size: var(--text-sm); }
-  .undo__msg { flex: 1; min-width: 0; }
-  .undo__btn { font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm);
-    cursor: pointer; background: transparent; color: var(--fg); min-height: 44px; padding: 6px 12px;
-    border: 1.5px solid var(--fg); border-radius: var(--radius-xs); }
-  .undo__btn:hover { background: var(--fg); color: var(--bg); }
+  /* Shown only if localStorage is unavailable — the page promises persistence,
+     so it must retract that promise rather than silently drop writes.
+     폼 안이 아니라 밖에 있는 이유: 폼이 이제 접혀 있어서, 안에 두면 저장이
+     불가능한 브라우저에서도 폼을 열어보기 전엔 경고를 못 본다. 약속은 페이지
+     머리(.head__lead)가 했으므로 철회도 그 근처에서 보여야 한다. */
+  .storewarn { margin: 0 0 var(--space-4); padding: 10px 12px; font-size: var(--text-xs);
+    color: var(--danger); border: 1.5px dashed var(--danger); border-radius: var(--radius-sm); }
 
   /* ---- Game grid -------------------------------------------------------- */
   .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--space-6) var(--space-5); }
   /* .polaroid supplies the photo-paper surface + the dark-theme token island,
-     so chips/labels/status colours inside stay readable on the cream. */
+     so chips/labels/status colours inside stay readable on the cream.
+     쉼 각도를 --rest-rot 으로 부르는 건 index · landing 과 같은 규약이다 —
+     같은 물건이 파일마다 다른 이름을 갖고 있었다. 리터럴 대신 변수인 이유도
+     거기와 같다: 미디어쿼리가 각도만 덮어야 하는데 transform 에 박아두면
+     hover 규칙까지 통째로 삼킨다. */
   .game { margin: 0; padding: 12px 12px 14px; box-shadow: var(--shadow-card);
-    transform: rotate(var(--rot, 0deg));
+    --rest-rot: 0deg;
+    transform: rotate(var(--rest-rot));
     transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
   .game:hover { transform: rotate(0deg) translateY(-3px); box-shadow: var(--shadow-lift); }
   /* 카드는 링크가 아니라 탭해도 페이지가 넘어가지 않는다 — 터치에서 :hover 가
      붙으면 기울기가 펴지고 그림자가 뜬 채로 굳으므로 쉼 상태를 되돌린다.
      안의 삭제 버튼은 자기 :hover 를 따로 갖는다(여기 영향 없음). */
   @media (hover: none) {
-    .game:hover { transform: rotate(var(--rot, 0deg)); box-shadow: var(--shadow-card); }
+    .game:hover { transform: rotate(var(--rest-rot)); box-shadow: var(--shadow-card); }
   }
+
+  /* ---- Add slot — 보드 첫 칸의 빈 폴라로이드 -----------------------------
+     컴포저가 340px 사이드바에서 여기로 내려온 이유: 붙이기는 드물고 사적인
+     행동인데(localStorage 라 이 브라우저 밖으로 안 나간다) 폭의 31.7% 를
+     상시 점유했고, 820px 아래에선 DOM 순서상 폼이 그리드 위로 올라가 보드를
+     첫 화면 밖으로 밀어냈다(실측: 그리드가 690px 지점에서 시작 — 390×844 에서
+     카드 윗동 150px 만 보였다). 빈 종이를 한 장 꺼내 붙이는 게 이 사이트의
+     은유지, 옆에 상시 대기하는 접수창구가 아니다.
+
+     빗금·종이톤이 --thumb-* 인 이유: index 히어로 슬롯과 게임 썸네일이 이미
+     쓰는 "아직 아무것도 없다" 언어다. 같은 사이트에서 그 말이 두 가지 모양으로
+     말해질 이유가 없다. 테두리만 dashed 로 갈라 "채워질 자리"임을 표시한다. */
+  .addslot { display: block; width: 100%; margin: 0; padding: 12px 12px 14px;
+    font: inherit; color: var(--fg); text-align: left; cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  .addslot:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  @media (hover: none) {
+    .addslot:hover { transform: none; box-shadow: var(--shadow-card); }
+  }
+  .addslot__slot { display: grid; place-items: center; aspect-ratio: 4/3;
+    background-color: var(--thumb-paper); border: 1px dashed var(--thumb-edge);
+    background-image: repeating-linear-gradient(135deg,
+      transparent 0 9px, var(--thumb-mark) 9px 18px); }
+  .addslot__slot svg { width: 28px; height: 28px; color: var(--fg); opacity: .55; }
+  .addslot__label { display: block; margin: 12px 4px 0;
+    font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; }
+
+  /* ---- Composer — 손에 든 카드 --------------------------------------------
+     제자리에서 펼치던 폼을 띄우는 카드로 바꿨다. 스크랩북에서 종이 위에 떠 있는
+     건 앱 크롬이 아니라 아직 안 붙인 카드다 — 빈 칸을 눌러 집어 들고, 쓰고,
+     붙이면 보드에 내려앉는다.
+
+     결정적인 건 좁은 화면 실측이었다. 인라인 폼의 "가로로 누우면 100px" 이득은
+     데스크톱 전용이다: 390px 에선 flex-wrap 이 필드를 다시 세로로 쌓아 ~380px 가
+     되고, 그게 그리드 첫 칸에 끼어들어 보드를 통째로 그만큼 밀어낸다 — 방금
+     걷어낸 사이드바 문제가 작은 몸집으로 돌아온다. 띄우면 보드는 제자리에 있다.
+
+     모양은 DESIGN.md §6 Modal/Sheet 규격이다 — --shadow-lift + 잉크 40% 오버레이.
+     다만 거기 적힌 "폴라로이드 카드" 대신 .paper 를 쓴다: .polaroid 는 사진지
+     섬이라 --border-strong 을 되돌리지 않는데, 다크에서 그 값은 chalk(#f1e8e2)
+     이고 섬의 배경은 크림(#efe7df) 이라 입력 테두리가 1.01:1 로 사라진다.
+     .paper 위에선 같은 테두리가 14.3:1 이다. 폼은 사진이 아니라 쓰는 종이이기도
+     하다. */
+  /* .paper 가 position: relative 를 주므로 여기서 되돌린다. UA 의 dialog:modal
+     규칙(0,2,0)이 .paper(0,1,0)를 이기지만 그 순서에 기대지 않는다 — 테이프가
+     absolute 라 이 요소가 컨테이닝 블록이어야 하는 것도 같은 이유다. */
+  /* 스크롤은 이 요소가 아니라 폼이 맡는다. 테이프는 위 모서리 *밖으로* 걸쳐야
+     붙어 보이는데(top:-12px), 여기가 스크롤 컨테이너면 그 걸친 부분이 잘려서
+     라벨이 반만 남는다. 실제로 그렇게 나갔다.
+     좌우·아래 패딩까지 폼으로 내린 이유: overflow-y:auto 는 overflow-x 를
+     visible 로 둘 수 없어 auto 로 끌어올린다. 폼에 가로 여백이 없으면 필드의
+     포커스 링(2px)이 그 축에서 잘린다. */
+  dialog.composer { position: fixed; inset: 0; margin: auto;
+    width: min(560px, calc(100vw - 2 * var(--space-5)));
+    max-height: calc(100vh - 2 * var(--space-6)); overflow: visible;
+    padding: var(--space-6) 0 0;
+    box-shadow: var(--shadow-lift);
+    /* 집어 드는 동작 — 카드가 살짝 떠오르며 또렷해진다. 여기가 쉼(=닫힘) 상태고
+       [open] 이 그걸 덮으며, 그 사이를 transition 이 잇는다.
+       진입 거리를 변수로 두는 이유는 --rest-rot 과 같다: 아래 좁은 화면 쿼리가
+       "값"만 덮어야 하는데 transform 에 박아두면 규칙까지 통째로 갈아엎게 된다.
+
+       display·overlay 가 transition 목록에 있어야 하는 이유: 이 요소는 닫히면
+       display:none 이고 최상위 레이어에서도 빠진다. allow-discrete 없이는 그 둘이
+       0프레임에 튀어서 나가는 애니메이션이 통째로 사라진다.
+       @starting-style 을 모르는 브라우저에선 애니메이션 없이 즉시 뜬다 — 깨지는
+       게 아니라 없어지는 실패 모드라 폴리필을 들이지 않는다.
+       reduced-motion 은 site.css 전역 가드가 transition-duration 을 죽여서
+       자동으로 걸린다(여기 따로 쓰지 않는다). */
+    --enter-y: 12px; --enter-s: .98;
+    opacity: 0; transform: translateY(var(--enter-y)) scale(var(--enter-s));
+    transition:
+      opacity var(--dur-base) var(--ease-paper),
+      transform var(--dur-base) var(--ease-paper),
+      overlay var(--dur-base) var(--ease-paper) allow-discrete,
+      display var(--dur-base) var(--ease-paper) allow-discrete; }
+  /* display 를 [open] 에만 다는 게 중요하다: 닫힘 상태의 display:none 은 UA 의
+     dialog:not([open]) 이 주는데 특정도가 같아서, 위 규칙에 display 를 쓰면
+     작성자 선언이 이겨서 닫힌 카드가 화면에 남는다. transition 목록의
+     allow-discrete 가 none↔flex 를 이어 준다. */
+  dialog.composer[open] { display: flex; flex-direction: column;
+    opacity: 1; transform: none; }
+  .composer__body { min-height: 0; overflow-y: auto;
+    padding: 0 var(--space-5) var(--space-5); }
+  @starting-style {
+    dialog.composer[open] { opacity: 0; transform: translateY(var(--enter-y)) scale(var(--enter-s)); }
+  }
+
+  /* 스크림도 같이 켜진다 — 40% 잉크가 한 프레임에 깔리면 "덮었다"가 아니라
+     "화면이 바뀌었다"로 읽힌다. 40% 는 DESIGN.md §6 규격이고, 생 rgba 대신
+     브랜드 토큰에서 파생한다(AGENTS.md — 새 생 hex 금지). */
+  dialog.composer::backdrop { background-color: transparent;
+    transition:
+      background-color var(--dur-base) var(--ease-paper),
+      overlay var(--dur-base) var(--ease-paper) allow-discrete,
+      display var(--dur-base) var(--ease-paper) allow-discrete; }
+  dialog.composer[open]::backdrop {
+    background-color: color-mix(in srgb, var(--brand-ink) 40%, transparent); }
+  @starting-style {
+    dialog.composer[open]::backdrop { background-color: transparent; }
+  }
+
+  .composer__fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); }
+  /* 폭이 곧 정보량이다 — 게임명은 유일한 필수값이라 한 줄을 통째로 갖고,
+     장르·플랫폼·상태는 한 단어라 셋이 한 줄을 나눈다. landing 의 프로필 메모가
+     균등 그리드 대신 내용이 폭을 정하게 둔 것과 같은 논리다.
+     flex-basis 가 곧 줄바꿈 지점이라 좁아지면 알아서 접힌다. */
+  .fld { flex: 1 1 130px; min-width: 0; }
+  .fld--name { flex: 1 1 100%; }
+  .fld label { display: block; font-size: var(--text-sm); font-weight: 700; margin-bottom: 6px; }
+  .req { color: var(--danger); }
+  .field, .select { width: 100%; box-sizing: border-box; font-family: var(--font-body); font-size: var(--text-base);
+    padding: 10px 12px; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--fg); }
+  .field:focus, .select:focus { outline: 0; border-color: var(--focus); box-shadow: 0 0 0 2px var(--focus); }
+  .field[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 35%, transparent); }
+  .err { color: var(--danger); font-size: var(--text-xs); margin: var(--space-3) 0 0; }
+  .composer__actions { flex: 1 1 100%; display: flex; align-items: center; justify-content: flex-end;
+    gap: var(--space-3); margin-top: var(--space-2); }
+  /* 닫기는 액션 줄에서 모서리로 옮겼다. 액션 줄에 두면 "붙이기" 바로 옆에서
+     같은 무게로 읽혀서, 그 줄이 결정 두 개를 나란히 내미는 꼴이 된다. 이 카드의
+     결정은 하나뿐이다 — 붙이거나 말거나. 나가는 문은 결정이 아니라 문이므로
+     모달이 늘 문을 두는 자리(오른쪽 위)로 보낸다.
+     44×44 는 터치 타깃 하한이고, 아이콘 색 --fg-muted 는 이 카드 표면
+     (--surface) 위에서 6.39:1(라이트) · 6.69:1(다크) 라 UI 컴포넌트 하한 3:1 을
+     넉넉히 넘는다. */
+  .composer__close { position: absolute; top: var(--space-2); right: var(--space-2);
+    width: 44px; height: 44px; display: grid; place-items: center;
+    cursor: pointer; background: transparent; color: var(--fg-muted);
+    border: 0; border-radius: var(--radius-sm); padding: 0; }
+  .composer__close:hover { color: var(--fg); background: var(--surface-2); }
+  .composer__hint { color: var(--fg-muted); font-size: var(--text-xs); margin: var(--space-3) 0 0; }
+  /* 붙인 결과를 카드 안에서 말해야 하는 이유: 모달이 열려 있는 동안 바깥은 inert
+     라 페이지 하단의 라이브 영역이 읽히지 않고, 보드도 스크림에 가려 새 카드가
+     내려앉는 게 안 보인다. 여러 개를 연달아 적을 수 있게 폼은 열어 두되,
+     붙었다는 사실은 여기서 확인한다. */
+  .composer__added { color: var(--ok); font-size: var(--text-xs); font-weight: 700;
+    margin: var(--space-3) 0 0; overflow-wrap: anywhere; }
+
+  /* 좁은 화면에선 바텀 시트 — 엄지가 닿는 곳에 붙고, 위쪽 여백으로 뒤의 보드가
+     계속 보여서 "덮은 게 아니라 얹혔다"가 유지된다. DESIGN.md §6 이 Modal 과
+     Sheet 를 한 컴포넌트로 묶어 둔 게 이 얘기다. */
+  @media (max-width: 560px) {
+    dialog.composer { inset: auto 0 0 0; margin: 0; width: 100%; max-height: 88vh;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      /* 시트는 떠오르는 게 아니라 바닥에서 올라온다 — 붙어 있는 모서리가 있으니
+         12px 부양은 그 모서리를 배신한다. 100% 는 자기 높이라 화면 밖에서
+         시작하고, 스케일은 끈다(붙은 물건은 커졌다 작아지지 않는다).
+         위 규칙은 그대로 두고 값만 덮는 게 이 변수의 존재 이유다. */
+      --enter-y: 100%; --enter-s: 1; }
+  }
+
+  /* ---- Ghost — 사진을 뗀 자리 --------------------------------------------
+     삭제는 확인 창이 없고 곧바로 localStorage 를 덮어쓰므로(games.js 의 save),
+     되돌릴 방법이 없으면 오클릭 한 번에 직접 타이핑한 게임이 영구히 사라진다.
+     그래서 되돌리기는 남기되, 그리드 위에 얹히던 별도 바에서 카드가 있던 그
+     자리로 옮겼다 — 사라진 물건은 아래인데 되돌리기는 저 위에 뜨는 게 원래
+     문제였다. 뗀 자리에서 되돌리면 설명이 필요 없다.
+     각도가 0 인 이유: 이건 붙어 있는 종이가 아니라 자국이다. */
+  .game--ghost { --rest-rot: 0deg; box-shadow: var(--shadow-tape); }
+  .game--ghost .game__thumb { background-image: repeating-linear-gradient(135deg,
+    transparent 0 9px, var(--thumb-mark) 9px 18px); }
+
+  /* 카드가 자국으로 바뀌는 순간. 순간이동하면 두 상태 사이에 아무 연결이 없어서
+     "무슨 일이 났지?"가 남는다 — 살짝 가라앉으며 나타나면 뗀 자리라는 게 동작으로
+     읽힌다. 움직임은 여기서 끝이다: 8초 뒤 사라지는 건 아무도 안 보고 있을 때라
+     나가는 애니메이션을 위해 요소를 붙들어 둘 이유가 없다.
+
+     유령에만 거는 이유: render() 가 카드를 매번 새로 만들기 때문에 모든 카드에
+     걸면 필터를 누를 때마다 보드 전체가 다시 등장하는 퍼레이드가 된다.
+
+     그 함정은 유령 자신에게도 있었다 — 유령도 render() 마다 새로 만들어지므로,
+     되돌리기가 떠 있는 동안 필터를 누르면 아무 일도 없는데 다시 가라앉았다.
+     그래서 애니메이션은 유령이 아니라 "방금 생긴 유령"에만 건다: games.js 가
+     삭제 직후 한 번만 이 상태 클래스를 붙이고 그 렌더에서 소비한다.
+
+     backwards 인 이유는 site.css 의 .rise 와 같다 — forwards 면 마지막 키프레임이
+     일반 선언을 이겨서 이 카드의 transform 이 영구히 박히고, 아래 to 가 쉼 상태와
+     같은 값인 것도 그래서다(끝나면 자기 CSS 로 매끄럽게 돌아간다). */
+  @media (prefers-reduced-motion: no-preference) {
+    .game--settling { animation: ghost-settle var(--dur-base) var(--ease-paper) backwards; }
+  }
+  @keyframes ghost-settle {
+    from { opacity: 0; transform: rotate(var(--rest-rot)) scale(1.02); }
+    to   { opacity: 1; transform: rotate(var(--rest-rot)); }
+  }
+  .game__ghost-msg { margin: 0 0 var(--space-3); font-size: var(--text-sm);
+    color: var(--fg-muted); overflow-wrap: anywhere; }
+  .game__undo { font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm);
+    cursor: pointer; background: transparent; color: var(--fg); min-height: 44px; padding: 6px 12px;
+    border: 1.5px solid var(--fg); border-radius: var(--radius-xs); }
+  /* --bg 가 아니라 --fg-on-ink 인 이유: 여기는 .polaroid 사진지 섬 안이라
+     --fg 는 두 테마 모두 잉크지만 --bg 는 다크에서 charcoal 이다. 잉크 배경에
+     charcoal 글자를 얹으면 다크에서 라벨이 통째로 사라진다. --fg-on-ink 는
+     이름 그대로 "잉크 위의 글자" 이고 두 테마에서 같은 값이다. */
+  .game__undo:hover { background: var(--fg); color: var(--fg-on-ink); }
   /* 게임 커버 아트는 전부 남의 저작물이라 실을 수 없고, AI 로 "비슷한 걸" 만드는
      건 더 나쁘다 — 무단 2차적저작물인 데다 실제 게임을 잘못 대표한다. 그래서
      썸네일은 정직한 플레이스홀더로 남긴다. 대신 카드마다 정체성이 생기도록
@@ -132,7 +311,11 @@
   .game__top .chip { flex: 0 0 auto; }
   .game__meta { display: flex; gap: var(--space-4); margin: var(--space-3) 0 0; }
   .game__meta > div { min-width: 0; }   /* 장르·플랫폼도 같은 이유로 사용자 입력이다 */
-  .game__meta dt { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--fg-muted); text-transform: uppercase; letter-spacing: .06em; }
+  /* uppercase 를 뺐다: 라벨은 games.js 가 박아 넣는 '장르'·'플랫폼' 이라 한글엔
+     대소문자가 없어 아무 일도 안 하면서, 읽는 사람에겐 영문 캡스 디자인이라고
+     말하고 있었다. 자간은 남긴다 — 캡스 트래킹이 아니라 이 크기의 라벨을
+     떨어뜨려 놓는 값이다. */
+  .game__meta dt { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--fg-muted); letter-spacing: .06em; }
   .game__meta dd { margin: 2px 0 0; font-size: var(--text-sm); font-weight: 700; color: var(--fg);
     overflow-wrap: anywhere; }
   .game__del { margin-top: var(--space-3); background: transparent; cursor: pointer;
@@ -146,18 +329,22 @@
     background: currentColor; -webkit-mask: var(--trash) center/contain no-repeat; mask: var(--trash) center/contain no-repeat; }
   .game__del:hover { background: color-mix(in srgb, var(--danger) 12%, transparent);
     border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
-  .game__del:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
   .grid-empty { padding: var(--space-8); text-align: center; color: var(--fg-muted); }
   .grid-empty .t-hand { font-size: var(--text-2xl); display: block; margin-bottom: var(--space-2); }
 
-  @media (max-width: 820px) {
-    .board__grid { grid-template-columns: 1fr; }
-    .composer { position: static; }
-  }
+  /* 820px 에서 사이드바를 1열로 접던 쿼리는 지웠다 — 사이드바 자체가 없다.
+     폼은 이제 flex-wrap 이라 폭이 줄면 알아서 접힌다. */
   @media (max-width: 480px) {
     .games { grid-template-columns: 1fr 1fr; }
     .head h1 { font-size: var(--text-3xl); }
+    /* 2열이 되어도 각도는 남긴다. 최악은 가장 좁은 360px 이고 거기서 카드가
+       144px 다((360 − wrap 좌우 48 − 열 gap 24)/2). 최대 기울기 1.4° 에 카드
+       높이 ~230px 이면 모서리가 가로로 (230/2)·sin1.4° = 2.8px 밀리는데 열
+       사이 gap 이 24px 이라 옆을 침범하지 않는다.
+       landing 이 좁은 화면에서 각도를 편 건 카드가 폭을 꽉 채워 여백이 0 이
+       되는 경우이고, 여기는 그 조건이 아니다 — 1열로 내리면 이 계산을 다시
+       한다. */
   }
 </style>
 </head>
@@ -226,8 +413,12 @@
     <!-- HEAD -->
     <section class="head" data-od-id="play-log-head">
       <div class="wrap">
+        <!-- 여기 있던 영어 라벨을 뺐다. 바로 아래 h1 을 영어로 옮긴 것뿐이라
+             정보가 아니라 리듬이었고, landing 이 같은 이유로 세 섹션의 라벨을
+             전부 걷어냈다(그 페이지 주석 참고) — 결정은 그때 내려졌는데 이
+             페이지에만 적용이 안 돼 있었다. .eyebrow 정의는 site.css 에 남긴다:
+             내부 참고용 logo-identity-directions.html 이 아직 4곳에서 쓴다. -->
         <div class="head__row">
-          <span class="eyebrow">Play Log</span>
           <h1 data-od-id="play-log-title">플레이한 게임</h1>
           <span class="head__count" id="gameCount">총 <b>0</b>개</span>
         </div>
@@ -236,84 +427,99 @@
     </section>
 
     <!-- BOARD -->
-    <section class="board">
-      <div class="wrap board__grid">
+    <!-- 헤딩이 보이지 않는 이유: 바로 위 h1 이 "플레이한 게임"이라고 이미 말했고
+         그 아래 또 "게임 목록"이라 쓰면 같은 말이 두 번이다. 그래도 헤딩이
+         필요한 건, 없으면 카드 제목(h3)이 h1 바로 뒤에 와서 이 보드를 가리키는
+         단계가 통째로 비기 때문이다. -->
+    <section class="board" aria-labelledby="board-h2">
+      <div class="wrap">
+        <h2 class="sr-only" id="board-h2">게임 목록</h2>
 
-        <!-- Composer -->
-        <form class="paper composer" id="addForm" data-od-id="game-composer" novalidate>
-          <span class="tape" aria-hidden="true">새 게임 ✎</span>
-          <h2>게임 추가</h2>
-          <p class="hint">게임명만 적어도 추가돼요. 나머지는 비우면 “—”로 들어가요.</p>
-
-          <div class="field-row">
-            <label for="f-name">게임명 <span aria-hidden="true" style="color:var(--danger)">*</span></label>
-            <input class="field" id="f-name" name="name" type="text" placeholder="예: 스타듀 밸리"
-                   autocomplete="off" required aria-describedby="f-name-err" />
-            <p class="err" id="f-name-err" hidden>게임명을 적어주세요냥.</p>
-          </div>
-
-          <div class="field-row two">
-            <div>
-              <label for="f-genre">장르</label>
-              <input class="field" id="f-genre" name="genre" type="text" placeholder="액션 RPG" autocomplete="off" />
-            </div>
-            <div>
-              <label for="f-platform">플랫폼</label>
-              <input class="field" id="f-platform" name="platform" type="text" placeholder="PC" autocomplete="off" />
-            </div>
-          </div>
-
-          <div class="field-row">
-            <label for="f-status">상태</label>
-            <select class="select" id="f-status" name="status">
-              <option value="played">플레이함</option>
-              <option value="playing">플레이중</option>
-              <option value="cleared">클리어</option>
-              <option value="planned">예정</option>
-            </select>
-          </div>
-
-          <button class="btn btn--primary" type="submit" data-od-id="submit-add-game">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            보드에 붙이기
-          </button>
-
-          <p class="storewarn" id="storeWarn" hidden>이 브라우저에는 목록을 저장할 수 없어요(시크릿 모드일 수 있어요). 새로고침하면 사라집니다.</p>
-        </form>
-
-        <!-- Grid + filters -->
-        <div>
-          <div class="filters" id="filters" role="group" aria-label="상태로 거르기" data-od-id="status-filters">
-            <button class="fchip" type="button" data-filter="all" aria-pressed="true" data-od-id="filter-all">전체</button>
-            <button class="fchip" type="button" data-filter="playing" aria-pressed="false" data-od-id="filter-playing">플레이중</button>
-            <button class="fchip" type="button" data-filter="cleared" aria-pressed="false" data-od-id="filter-cleared">클리어</button>
-            <button class="fchip" type="button" data-filter="played" aria-pressed="false" data-od-id="filter-played">플레이함</button>
-            <button class="fchip" type="button" data-filter="planned" aria-pressed="false" data-od-id="filter-planned">예정</button>
-          </div>
-
-          <div class="undo" id="undoBar" role="status" hidden data-od-id="undo-bar">
-            <span class="undo__msg" id="undoMsg"></span>
-            <button class="undo__btn" type="button" id="undoBtn" data-od-id="undo-restore">되돌리기</button>
-          </div>
-
-          <!-- The grid is NOT a live region: render() replaces it wholesale, so
-               aria-live here would re-read every card on every filter click.
-               #liveStatus below announces one sentence instead. -->
-          <div class="games" id="gameGrid" data-od-id="game-grid"></div>
-
-          <!-- 빈 이유가 둘이라 문구도 둘이다: 필터가 걸러낸 것과 보드 자체가 빈 것.
-               하나로 합치면 전부 지운 사용자에게 고를 수 없는 필터를 권하게 된다.
-               위치를 가리키는 표현('왼쪽')은 쓰지 않는다 — 820px 아래에서 폼이
-               그리드 위로 올라가므로 방향이 뒤집힌다. -->
-          <div class="grid-empty" id="gridEmpty" hidden data-od-id="game-grid-empty">
-            <span class="t-hand">텅 비었네냥…</span>
-            <span data-empty="filter">이 상태의 게임이 없어요. 다른 필터를 골라보거나 새 게임을 추가해보세요.</span>
-            <span data-empty="board" hidden>아직 붙인 게임이 없어요. ‘게임 추가’로 첫 게임을 붙여보세요.</span>
-          </div>
-
-          <p class="sr-only" role="status" id="liveStatus"></p>
+        <div class="filters" id="filters" role="group" aria-label="상태로 거르기" data-od-id="status-filters">
+          <button class="fchip" type="button" data-filter="all" aria-pressed="true" data-od-id="filter-all">전체</button>
+          <button class="fchip" type="button" data-filter="playing" aria-pressed="false" data-od-id="filter-playing">플레이중</button>
+          <button class="fchip" type="button" data-filter="cleared" aria-pressed="false" data-od-id="filter-cleared">클리어</button>
+          <button class="fchip" type="button" data-filter="played" aria-pressed="false" data-od-id="filter-played">플레이함</button>
+          <button class="fchip" type="button" data-filter="planned" aria-pressed="false" data-od-id="filter-planned">예정</button>
         </div>
 
+        <p class="storewarn" id="storeWarn" hidden>이 브라우저에는 목록을 저장할 수 없어요(시크릿 모드일 수 있어요). 새로고침하면 사라집니다.</p>
+
+        <!-- The grid is NOT a live region: render() replaces the cards wholesale,
+             so aria-live here would re-read every card on every filter click.
+             #liveStatus below announces one sentence instead.
+             붙이기 슬롯은 이 그리드의 정적 자식이라 render() 가 건드리지 않는다 —
+             카드에는 data-card 가 붙어 있고 그것만 갈아끼운다. -->
+        <div class="games" id="gameGrid" data-od-id="game-grid">
+
+          <button class="polaroid addslot" type="button" id="addOpen" data-od-id="add-open">
+            <span class="addslot__slot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
+            <span class="addslot__label">새 게임 붙이기</span>
+          </button>
+
+        </div>
+
+        <!-- 빈 이유가 둘이라 문구도 둘이다: 필터가 걸러낸 것과 보드 자체가 빈 것.
+             하나로 합치면 전부 지운 사용자에게 고를 수 없는 필터를 권하게 된다.
+             위치를 가리키는 표현('왼쪽')은 쓰지 않는다 — 슬롯 위치가 화면 폭에
+             따라 움직인다. -->
+        <div class="grid-empty" id="gridEmpty" hidden data-od-id="game-grid-empty">
+          <span class="t-hand">텅 비었네냥…</span>
+          <span data-empty="filter">이 상태의 게임이 없어요. 다른 필터를 골라보거나 새 게임을 붙여보세요.</span>
+          <span data-empty="board" hidden>아직 붙인 게임이 없어요. 빈 칸을 눌러 첫 게임을 붙여보세요.</span>
+        </div>
+
+        <p class="sr-only" role="status" id="liveStatus"></p>
+
+        <!-- 네이티브 다이얼로그 요소를 쓰는 이유: 포커스 트랩·Esc 닫기·뒤 배경 inert·
+             닫을 때 포커스를 부른 자리로 되돌리기·백드롭을 전부 브라우저가 준다.
+             의존성 0 · 빌드 0 인 저장소에서 직접 짜면 그게 다 조용히 틀릴 자리다.
+             autofocus 가 게임명에 있는 이유: showModal 은 autofocus 를 먼저 보고,
+             없으면 첫 포커스 가능 요소를 잡는다 — 마크업 순서에 기대지 않는다. -->
+        <dialog class="paper composer" id="addDialog" aria-labelledby="composer-h2" data-od-id="game-composer">
+          <span class="tape" aria-hidden="true">새 게임 ✎</span>
+          <h2 class="sr-only" id="composer-h2">새 게임 붙이기</h2>
+          <button class="composer__close" type="button" id="addClose" data-od-id="add-close" aria-label="닫기">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+          <form class="composer__body" id="addForm" novalidate>
+            <div class="composer__fields">
+              <div class="fld fld--name">
+                <label for="f-name">게임명 <span aria-hidden="true" class="req">*</span></label>
+                <input class="field" id="f-name" name="name" type="text" placeholder="예: 스타듀 밸리"
+                       autocomplete="off" autofocus required aria-describedby="f-name-err" />
+              </div>
+              <div class="fld">
+                <label for="f-genre">장르</label>
+                <input class="field" id="f-genre" name="genre" type="text" placeholder="액션 RPG" autocomplete="off" />
+              </div>
+              <div class="fld">
+                <label for="f-platform">플랫폼</label>
+                <input class="field" id="f-platform" name="platform" type="text" placeholder="PC" autocomplete="off" />
+              </div>
+              <div class="fld">
+                <label for="f-status">상태</label>
+                <select class="select" id="f-status" name="status">
+                  <option value="played">플레이함</option>
+                  <option value="playing">플레이중</option>
+                  <option value="cleared">클리어</option>
+                  <option value="planned">예정</option>
+                </select>
+              </div>
+              <div class="composer__actions">
+                <button class="btn btn--primary" type="submit" data-od-id="submit-add-game">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                  붙이기
+                </button>
+              </div>
+            </div>
+            <p class="err" id="f-name-err" hidden>게임명을 적어주세요냥.</p>
+            <p class="composer__added" id="addStatus" role="status"></p>
+            <p class="composer__hint">게임명만 적어도 돼요. 나머지는 비우면 “—”로 들어가요.</p>
+          </form>
+        </dialog>
       </div>
     </section>
   </main>

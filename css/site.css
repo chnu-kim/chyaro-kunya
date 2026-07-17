@@ -327,7 +327,12 @@ h1.t-script, h2.t-script { letter-spacing: 0.01em; }
 .foot__inner { max-width: 1120px; margin: 0 auto; padding: var(--space-6) var(--space-5);
   display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; }
 .foot a { color: var(--fg-on-brown); }
-.foot small { font-family: var(--font-mono); font-size: var(--text-2xs); opacity: .8; }
+/* opacity 를 걸지 않는다. .8 을 주면 --fg-on-brown 이 브라운 푸터 위에서
+   #dbcec7 로 합성되어 대비가 4.31 로 떨어지는데, 이 줄은 11px 라 큰 텍스트가
+   아니어서 4.5 를 넘겨야 한다. 색 자체로는 5.67 이라 통과하므로, 흐리게 보이길
+   원하면 투명도가 아니라 대비를 계산할 수 있는 색을 쓴다 — 합성 결과를 재보지
+   않으면 미달인 걸 눈으로는 못 잡는다. */
+.foot small { font-family: var(--font-mono); font-size: var(--text-2xs); }
 .foot .brand__cat, .foot .brand__name { color: var(--fg-on-brown); }
 /* The footer mascot keeps its white artwork in both themes — it sits on the
    footer's own dark-brown surface, which does not follow the page theme. */

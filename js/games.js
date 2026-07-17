@@ -91,6 +91,7 @@
 
   var grid      = document.getElementById('gameGrid');
   var empty     = document.getElementById('gridEmpty');
+  var emptyFor  = { filter: null, board: null };
   var countEl   = document.getElementById('gameCount');
   var form      = document.getElementById('addForm');
   var nameIn    = document.getElementById('f-name');
@@ -104,6 +105,8 @@
 
   grid.setAttribute('tabindex', '-1');
   if (!storageOK && storeWarn) storeWarn.hidden = false;
+  emptyFor.filter = empty.querySelector('[data-empty="filter"]');
+  emptyFor.board  = empty.querySelector('[data-empty="board"]');
 
   function esc(s) {
     return String(s).replace(/[&<>"'`]/g, function (c) {
@@ -138,7 +141,7 @@
         '<span class="clip" aria-hidden="true"></span>' +
         '<div class="game__thumb" data-p="' + axis(g.id, 'pat', PATTERNS) + '" aria-hidden="true">' +
           '<span class="game__initial">' + esc(initial) + '</span>' +
-          '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="15" rx="5.4" ry="4.4"/><circle cx="6.5" cy="9" r="2"/><circle cx="17.5" cy="9" r="2"/><circle cx="9.4" cy="6.4" r="1.7"/><circle cx="14.6" cy="6.4" r="1.7"/></svg>' +
+          '<svg><use href="#mk-paw"/></svg>' +
         '</div>' +
         '<figcaption class="game__body">' +
           '<div class="game__top">' +
@@ -160,6 +163,10 @@
     var list = state.filter(function (g) { return filter === 'all' || g.status === filter; });
     grid.innerHTML = list.map(card).join('');
     empty.hidden = list.length > 0;
+    // 보드가 통째로 비었나(사용자가 다 지웠다), 아니면 필터가 걸러냈나.
+    var boardEmpty = state.length === 0;
+    if (emptyFor.board)  emptyFor.board.hidden  = !boardEmpty;
+    if (emptyFor.filter) emptyFor.filter.hidden = boardEmpty;
     countEl.innerHTML = filter === 'all'
       ? '총 <b>' + state.length + '</b>개'
       : '<b>' + list.length + '</b> / ' + state.length + '개 표시';

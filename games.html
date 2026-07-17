@@ -118,12 +118,23 @@
   .game__thumb svg { position: absolute; right: 7px; bottom: 6px; width: 20px; height: 20px;
     color: var(--fg); opacity: .28; }
   .game__body { margin: 12px 4px 0; }
-  .game__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-  .game__name { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; color: var(--fg); }
+  /* 이름과 칩이 한 줄에 안 들어가면 칩이 아래로 내려간다. wrap 이 없으면 칩은
+     flex:0 0 auto 라 안 줄고 이름만 짓눌린다 — 360px 2열에서 이름 몫이 30px 다
+     (카드 144 = (360 − wrap 좌우 48 − 열 gap 24)/2, 거기서 카드 패딩 24 · 본문
+     여백 8 · 칩 74 · gap 8 을 뺀 값). 이름은 카드의 제목이지 남는 자리가 아니다. */
+  .game__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  /* min-width:0 + anywhere 가 둘 다 필요하다. 게임명은 사용자 입력이라 끊을 데가
+     없는 라틴 한 덩어리가 들어올 수 있고(예: Cyberpunk2077), flex 자식의 기본
+     min-width:auto 는 그 단어 폭 아래로 안 줄어 칩을 카드 밖으로 밀어낸다.
+     한글은 음절마다 끊겨서 이 경로를 타지 않으므로 시드만 보면 안 드러난다. */
+  .game__name { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; color: var(--fg);
+    min-width: 0; overflow-wrap: anywhere; }
   .game__top .chip { flex: 0 0 auto; }
   .game__meta { display: flex; gap: var(--space-4); margin: var(--space-3) 0 0; }
+  .game__meta > div { min-width: 0; }   /* 장르·플랫폼도 같은 이유로 사용자 입력이다 */
   .game__meta dt { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--fg-muted); text-transform: uppercase; letter-spacing: .06em; }
-  .game__meta dd { margin: 2px 0 0; font-size: var(--text-sm); font-weight: 700; color: var(--fg); }
+  .game__meta dd { margin: 2px 0 0; font-size: var(--text-sm); font-weight: 700; color: var(--fg);
+    overflow-wrap: anywhere; }
   .game__del { margin-top: var(--space-3); background: transparent; cursor: pointer;
     font-family: var(--font-body); font-weight: 700; font-size: var(--text-xs); color: var(--danger);
     padding: 6px 10px; border: 1px solid transparent; border-radius: var(--radius-sm);
@@ -168,6 +179,23 @@
       <path d="M3 2.5h9M3 9.5h9M3 16.5h9"/>
       <path d="M52 2.5h9M52 9.5h9M52 16.5h9"/>
     </g>
+  </symbol>
+
+  <!-- 발바닥. 도형의 정본은 assets/deco-paw.svg — 고칠 땐 거기와 index · landing ·
+       og-cover 까지 다섯 곳이다. 카드 썸네일이 games.js 에서 이 심볼을 참조한다.
+       채움을 심볼에 거는 이유: SVG 의 기본 채움은 currentColor 가 아니라 검정이라,
+       참조부에서 color 만 바꾸면 다크 테마의 사진지 위에 검은 자국이 그대로 남는다. -->
+  <symbol id="mk-paw" viewBox="0 0 64 64" fill="currentColor">
+    <!-- 발가락과 발바닥 사이 여백(실측 최소 3.6)이 이 도형의 유일한 제약이다: 전부
+         같은 fill 이라 닿는 순간 union 으로 뭉쳐 발가락이 사라진다. 발가락폭이
+         발바닥폭의 0.44 인 이유(고양이 비율), 발바닥 세로비가 1.29 인 이유, 그리고
+         세로 길이가 다른 대안 두 개(deco-paw-tall / -flat)는 정본인
+         assets/deco-paw.svg 주석에 있다. -->
+    <ellipse cx="22.4" cy="17.6" rx="7.4" ry="9.1" transform="rotate(-7 22.4 17.6)"/>
+    <ellipse cx="41.6" cy="17.6" rx="7.4" ry="9.1" transform="rotate(7 41.6 17.6)"/>
+    <ellipse cx="9.2"  cy="30"   rx="7.4" ry="9.1" transform="rotate(-34 9.2 30)"/>
+    <ellipse cx="54.8" cy="30"   rx="7.4" ry="9.1" transform="rotate(34 54.8 30)"/>
+    <path d="M32 29.4C35.3 30.6 40.4 32.2 43.2 35.7C46.3 39.4 48.9 42.6 48.8 46.6C48.7 51.3 45.6 55.1 40.6 55.4C37.2 55.6 34.2 54.9 32 53.6C29.8 54.9 26.8 55.6 23.4 55.4C18.4 55.1 15.3 51.3 15.2 46.6C15.1 42.6 17.7 39.4 20.8 35.7C23.6 32.2 28.7 30.6 32 29.4Z"/>
   </symbol>
 </svg>
 
@@ -273,9 +301,14 @@
                #liveStatus below announces one sentence instead. -->
           <div class="games" id="gameGrid" data-od-id="game-grid"></div>
 
+          <!-- 빈 이유가 둘이라 문구도 둘이다: 필터가 걸러낸 것과 보드 자체가 빈 것.
+               하나로 합치면 전부 지운 사용자에게 고를 수 없는 필터를 권하게 된다.
+               위치를 가리키는 표현('왼쪽')은 쓰지 않는다 — 820px 아래에서 폼이
+               그리드 위로 올라가므로 방향이 뒤집힌다. -->
           <div class="grid-empty" id="gridEmpty" hidden data-od-id="game-grid-empty">
             <span class="t-hand">텅 비었네냥…</span>
-            이 상태의 게임이 없어요. 다른 필터를 골라보거나 새 게임을 추가해보세요.
+            <span data-empty="filter">이 상태의 게임이 없어요. 다른 필터를 골라보거나 새 게임을 추가해보세요.</span>
+            <span data-empty="board" hidden>아직 붙인 게임이 없어요. ‘게임 추가’로 첫 게임을 붙여보세요.</span>
           </div>
 
           <p class="sr-only" role="status" id="liveStatus"></p>

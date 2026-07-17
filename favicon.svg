@@ -8,13 +8,15 @@
        채움이 사라져 빈 아이콘으로 보인다 — favicon 은 스타일시트 생존에 기대면
        안 된다. 아래 스타일 블록은 그 위에 다크 크롬 대응만 얹는다: favicon 은
        페이지 밖이라 상속받을 색이 없고, charcoal 탭에선 잉크 블록이 안 보이기
-       때문이다. 값은 css/site.css 토큰(brand-ink 라이트 · fg 다크)과 같다.
+       때문이다. 라이트 채움은 css/site.css 의 brand-ink 토큰이고, 다크 채움은
+       그 fg 토큰(chalk) 대신 순백 #ffffff 를 쓴다 — chalk 는 파비콘 크기에서
+       애매한 베이지로 흐려 어두운 탭에서 덜 보였다.
 
        viewBox 는 도장 외곽에 딱 맞춰 여백을 없앴다 — 좌표는 그대로 두고 잘라내기만
        했다. 작은 파비콘에서 마크가 최대한 크게 보이게 하려는 것이다. 도형 크기를
        바꾸면 viewBox 도 외곽에 다시 맞춘다. -->
   <style>
-    @media (prefers-color-scheme: dark) { .ink { fill: #f1e8e2 } }
+    @media (prefers-color-scheme: dark) { .ink { fill: #ffffff } }
   </style>
   <g class="ink" fill="#181818">
     <path fill-rule="evenodd" d="M6 15C6 10 10 6 15 6h34c5 0 9 4 9 9v34c0 5-4 9-9 9H15c-5 0-9-4-9-9z

@@ -141,9 +141,12 @@
   </symbol>
 </svg>
 
-<!-- One paw definition, referenced three times -->
+<!-- 발바닥 하나를 세 번 참조한다. landing 의 같은 도형과 이름·채움 규약을 맞춘 것 —
+     마크 심볼은 mk- 접두사를 쓰고, 채움은 참조하는 쪽이 아니라 심볼에 건다.
+     SVG 의 기본 채움은 currentColor 가 아니라 검정이라, 참조부에서 color 만 바꾸면
+     다크 테마의 종이 위에 검은 자국이 그대로 남는다. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <symbol id="paw" viewBox="0 0 60 56">
+  <symbol id="mk-paw" viewBox="0 0 60 56" fill="currentColor">
     <ellipse cx="13" cy="25" rx="5" ry="6" transform="rotate(-20 13 25)"/>
     <ellipse cx="24" cy="16" rx="6" ry="7.5" transform="rotate(-8 24 16)"/>
     <ellipse cx="38" cy="16" rx="6" ry="7.5" transform="rotate(8 38 16)"/>
@@ -190,9 +193,9 @@
 
       <!-- 발바닥 트레일 — 걷는 흔적 -->
       <div class="deco-paws" aria-hidden="true">
-        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
-        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
-        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
+        <svg class="deco-paw"><use href="#mk-paw"/></svg>
+        <svg class="deco-paw"><use href="#mk-paw"/></svg>
+        <svg class="deco-paw"><use href="#mk-paw"/></svg>
       </div>
 
       <div class="cards-outer rise" style="--rise-delay:360ms">

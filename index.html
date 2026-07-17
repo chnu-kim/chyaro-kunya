@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>챠이로 쿠냐 — 팬 사이트</title>
+<meta name="description" content="버추얼 스트리머 챠이로 쿠냐 팬 사이트. 소개 랜딩과 플레이 게임 목록." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#15110f" media="(prefers-color-scheme: dark)" />
+
+<!-- Social cards. og:image is absolute: X and Slack ignore relative paths, so a
+     bare "assets/…" silently yields a card with no image. If the repo is ever
+     renamed or moved to a custom domain, this URL must move with it. -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://chnu-kim.github.io/chyaro-kunya" />
+<meta property="og:site_name" content="챠이로 쿠냐 팬 사이트" />
+<meta property="og:title" content="챠이로 쿠냐 — 팬 사이트" />
+<meta property="og:description" content="갈색 고양이 버추얼 스트리머 챠이로 쿠냐의 작은 다꾸 노트. 어서오냥, 쿠냥이 ♡" />
+<meta property="og:image" content="https://chnu-kim.github.io/chyaro-kunya/assets/og-cover.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="챠이로 쿠냐 데뷔 카드 일러스트" />
+<meta property="og:locale" content="ko_KR" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Gothic+A1:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Sacramento&display=swap" />
+<link rel="stylesheet" href="css/site.css" />
+<script>/* apply saved/system theme before first paint — no light-mode flash */try{var t=localStorage.getItem('ck-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+  .home { padding: var(--space-8) 0 var(--space-9); }
+  .home__hero { text-align: center; max-width: 640px; margin: 0 auto var(--space-8); }
+  .home__hero .chip { margin-bottom: var(--space-5); }
+  /* Small pinned key-visual — secondary to the script headline (the screen's main flourish) */
+  .home__photo { width: 168px; margin: 0 auto var(--space-6); position: relative;
+    --rest-rot: -3deg; transform: rotate(var(--rest-rot));
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  .home__photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
+  .home__photo:hover { transform: rotate(0deg) translateY(-3px); }
+  @media (hover: none) {
+    .home__photo:hover { transform: rotate(var(--rest-rot)); }
+  }
+  .home__photo .tape { z-index: 2; }
+  /* Face + tracking come from .t-script. The Korean wordmark resolves to Nanum
+     Pen Script through --font-script (Sacramento has no Hangul) — a handwritten
+     diary title, which is the point. */
+  .home__hero h1 { font-size: var(--text-5xl); line-height: 1.05; }
+  .home__hero p { color: var(--fg-muted); font-size: var(--text-lg); margin-top: var(--space-3); }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  .navcard { display: block; text-decoration: none; color: inherit; padding: var(--space-7);
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  .navcard:nth-child(1) { transform: rotate(-1deg); }
+  .navcard:nth-child(2) { transform: rotate(1deg); }
+  .navcard:hover,
+  .navcard:focus-visible { transform: rotate(0deg) translateY(-4px); box-shadow: var(--shadow-lift); }
+  .navcard:active { transform: rotate(0deg) translateY(0px); box-shadow: var(--shadow-card); }
+  .navcard__ic { width: 44px; height: 44px; color: var(--fg); margin-bottom: var(--space-4); }
+  .navcard h2 { font-size: var(--text-2xl); margin-bottom: var(--space-2); }
+  .navcard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0 0 var(--space-4); }
+  .navcard__go { font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm);
+    display: inline-flex; align-items: center; gap: 6px; color: var(--accent-ink); }
+  .navcard__go svg { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-paper); }
+  .navcard:hover .navcard__go svg,
+  .navcard:focus-visible .navcard__go svg { transform: translateX(4px); }
+
+  /* Two columns only once a card can hold a readable measure. At 640px each
+     card is 280px wide and 48px of padding leaves 184px of text — about 13
+     Korean characters per line; at 601px it drops to 11. So the grid stacks
+     well above the 600px "mobile" breakpoint, and only true mobile also loses
+     the collage rotation and tightens the padding. */
+  @media (max-width: 760px) {
+    .cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .navcard { padding: var(--space-5); }
+    .navcard:nth-child(1), .navcard:nth-child(2) { transform: none; }
+    /* Same specificity as the resting rule above and declared after it, so the
+       interaction states must be re-stated here or `transform: none` swallows
+       them — a keyboard user in a narrow window would lose the lift entirely. */
+    .navcard:hover,
+    .navcard:focus-visible { transform: translateY(-4px); }
+    .navcard:active { transform: translateY(0); }
+  }
+
+  /* 발바닥 트레일 — 카드 쪽으로 걸어간 자국.
+     Rotations now track one direction of travel instead of scattering across
+     60°, the prints alternate above/below the path like real left/right feet,
+     and each step is fainter than the next so the row reads as a receding
+     trail rather than three evenly spaced glyphs. --paw-dim dims the whole
+     trail in dark without flattening that per-step gradient. */
+  .deco-paws { display: flex; justify-content: center; align-items: center; gap: 18px;
+    color: var(--brand-taupe); margin-bottom: var(--space-7);
+    pointer-events: none; user-select: none; }
+  .deco-paw { width: 22px; height: 21px; flex-shrink: 0;
+    --paw-dim: 1; --paw-fade: .6; opacity: calc(var(--paw-fade) * var(--paw-dim)); }
+  .deco-paw:nth-child(1) { --paw-fade: .40; transform: rotate(-10deg) translateY(6px) scale(.94); }
+  .deco-paw:nth-child(2) { --paw-fade: .58; transform: rotate(3deg) translateY(-5px); }
+  .deco-paw:nth-child(3) { --paw-fade: .78; transform: rotate(12deg) translateY(5px) scale(1.04); }
+  [data-theme="dark"] .deco-paw { --paw-dim: .85; }
+
+  /* 마스코트 잉크 스티커 — 순수 장식(aria-hidden)이라 <img> 일 이유가 없다.
+     src 로 두면 프리로드 스캐너가 라이트 버전을 먼저 받고 site.js 가 끝에서
+     src 를 갈아끼우므로, 다크 사용자는 두 장(25KB + 29KB)을 받고 잘못된 쪽이
+     한 프레임 보인다 — 페이지 전체가 무플래시 테마 스크립트를 쓰는데 이것만
+     깜빡인다. 배경으로 두면 셀렉터에 걸린 한 장만 받고 깜빡임도 없다.
+     절대 위치라 CLS 는 애초에 없고, 높이는 원본비(206:308)로 고정한다. */
+  .cards-outer { position: relative; max-width: 880px; margin: 0 auto; }
+  .mascot-sticker { position: absolute; bottom: -32px; right: -18px;
+    width: 72px; height: 108px;
+    background: url('assets/kunyang-mascot-ink.png') center / contain no-repeat;
+    transform: rotate(-8deg); pointer-events: none; user-select: none; opacity: 0.88; }
+  [data-theme="dark"] .mascot-sticker { background-image: url('assets/kunyang-mascot.png'); }
+  @media (max-width: 600px) {
+    .mascot-sticker { width: 54px; height: 81px; right: 4px; bottom: -14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Brand mark · C 카오모지. 쿠냐가 이미 쓰는 얼굴 ﾐ๑•ﻌ•๑ﾐ 를 기하학으로 다시 그린 것.
+     A 잉크 도장과 한 쌍으로 확정 — A는 favicon.svg 와 OG 워터마크를 맡는다.
+     스펙: logo-identity-directions.html · 인라인인 이유: 외부 스프라이트 <use> 는
+     file:// 와 크로스오리진에서 죽는다. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="mk-kao" viewBox="0 0 64 22">
+    <circle cx="24" cy="6.5" r="3.6"/>
+    <circle cx="40" cy="6.5" r="3.6"/>
+    <path d="M32 14.3l-3.2-2.8h6.4z"/>
+    <g fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+      <path d="M32 14.3v1.8"/>
+      <path d="M32 16.1c-1.7 3.2-5.8 3.2-6.8-.4"/>
+      <path d="M32 16.1c1.7 3.2 5.8 3.2 6.8-.4"/>
+      <path d="M3 2.5h9M3 9.5h9M3 16.5h9"/>
+      <path d="M52 2.5h9M52 9.5h9M52 16.5h9"/>
+    </g>
+  </symbol>
+</svg>
+
+<!-- One paw definition, referenced three times -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="paw" viewBox="0 0 60 56">
+    <ellipse cx="13" cy="25" rx="5" ry="6" transform="rotate(-20 13 25)"/>
+    <ellipse cx="24" cy="16" rx="6" ry="7.5" transform="rotate(-8 24 16)"/>
+    <ellipse cx="38" cy="16" rx="6" ry="7.5" transform="rotate(8 38 16)"/>
+    <ellipse cx="49" cy="25" rx="5" ry="6" transform="rotate(20 49 25)"/>
+    <ellipse cx="31" cy="39" rx="18" ry="14"/>
+  </symbol>
+</svg>
+
+<div class="page">
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <header class="nav" data-od-id="site-nav">
+    <div class="nav__inner">
+      <a class="brand" href="index.html" aria-label="챠이로 쿠냐 홈">
+        <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
+        <span class="brand__name">챠이로 쿠냐</span>
+      </a>
+      <span class="brand__tag">VTUBER</span>
+      <span class="nav__spacer"></span>
+      <nav class="nav__links" aria-label="주 메뉴">
+        <a class="nav__link" href="landing.html">소개</a>
+        <a class="nav__link" href="games.html">게임</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-od-id="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="다크 모드로 전환">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="home" id="main" data-od-id="home">
+    <div class="wrap">
+      <div class="home__hero" data-od-id="home-hero">
+        <figure class="home__photo rise--photo" data-od-id="home-key-visual">
+          <span class="tape" aria-hidden="true">Kunya ♡</span>
+          <img src="assets/kunya-debut-336.jpg" width="336" height="454" fetchpriority="high"
+               alt="챠이로 쿠냐 데뷔 카드 — 트윈테일 갈색 머리에 고양이 프린트 검은 스웨터 차림의 전신 일러스트" />
+        </figure>
+        <span class="chip chip--ink t-caps rise" style="--rise-delay:180ms">Chyaro Kunya · Fan Site</span>
+        <h1 class="t-script rise" data-od-id="home-title" style="--rise-delay:240ms">챠이로 쿠냐</h1>
+        <p class="rise" style="--rise-delay:300ms">갈색 고양이 버추얼 스트리머의 작은 다꾸 노트. <span class="t-hand" style="font-size:var(--text-xl)">어서오냥, 쿠냥이 ♡</span></p>
+      </div>
+
+      <!-- 발바닥 트레일 — 걷는 흔적 -->
+      <div class="deco-paws" aria-hidden="true">
+        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
+        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
+        <svg class="deco-paw" fill="currentColor"><use href="#paw"/></svg>
+      </div>
+
+      <div class="cards-outer rise" style="--rise-delay:360ms">
+        <div class="cards" data-od-id="home-nav-cards">
+          <a class="paper navcard" href="landing.html" data-od-id="nav-card-about">
+            <span class="tape" aria-hidden="true">쿠냐 ♡</span>
+            <svg class="navcard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+            <h2>소개</h2>
+            <p>프로필·캐릭터 설정·주요 컨텐츠·소셜 링크까지. 쿠냐가 누구인지 한 장에.</p>
+            <span class="navcard__go">보러가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+
+          <a class="paper navcard" href="games.html" data-od-id="nav-card-games">
+            <span class="clip" aria-hidden="true"></span>
+            <svg class="navcard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7" width="19" height="10.5" rx="3.5"/><path d="M7.5 11v3M6 12.5h3M15.5 11.5h.01M18 13.5h.01"/></svg>
+            <h2>플레이 게임</h2>
+            <p>방송에서 플레이한 게임 보드. 직접 추가·삭제하고 상태로 골라볼 수 있어요.</p>
+            <span class="navcard__go">보러가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+        </div>
+        <span class="mascot-sticker" aria-hidden="true"></span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot" data-od-id="site-footer">
+    <div class="foot__inner">
+      <div class="brand">
+        <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
+        <span class="brand__name">챠이로 쿠냐</span>
+      </div>
+      <small>© <span data-year>2026</span> Chyaro Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
+      <img class="foot__mascot" src="assets/kunyang-mascot.png" width="206" height="308"
+           alt="" aria-hidden="true" loading="lazy" decoding="async" />
+    </div>
+  </footer>
+</div>
+
+<script src="js/site.js"></script>
+</body>
+</html>

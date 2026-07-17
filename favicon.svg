@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="챠이로 쿠냐">
+  <!-- Brand mark · A 잉크 도장. The cat is not drawn — it is carved out of the
+       ink (fill-rule="evenodd"), then the eyes are pressed back on top.
+       Paired with C 카오모지 (#mk-kao in css/site.css consumers), which carries
+       the nav and footer. Spec: logo-identity-directions.html
+
+       currentColor is unavailable here: a favicon renders outside the page, so
+       there is no inherited colour to follow. The media query below is the only
+       thing that keeps the mark alive on a dark browser chrome — otherwise the
+       ink block sits invisible on a charcoal tab strip. Values are the same
+       brand tokens as css/site.css (--brand-ink light / --fg dark). -->
+  <style>
+    .ink { fill: #181818 }
+    @media (prefers-color-scheme: dark) { .ink { fill: #f1e8e2 } }
+  </style>
+  <g class="ink">
+    <path fill-rule="evenodd" d="M6 15C6 10 10 6 15 6h34c5 0 9 4 9 9v34c0 5-4 9-9 9H15c-5 0-9-4-9-9z
+      M16 13l6.5 12.5c3-1.5 16-1.5 19 0L48 13l1.5 18c1 10-6.5 18-17.5 18s-19-8-17.5-18z"/>
+    <circle cx="25" cy="33" r="2.6"/>
+    <circle cx="39" cy="33" r="2.6"/>
+  </g>
+</svg>

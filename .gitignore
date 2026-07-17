@@ -1,0 +1,17 @@
+# 이 저장소는 GitHub Pages 로 공개된다. 여기 들어간 파일은 나중에 지워도
+# git 히스토리에 남고 캐시·인덱싱된다 — 애매하면 넣지 않는다.
+
+# Open Design 내부 — 사이트와 무관한 도구 상태
+.od-skills/
+*.artifact.json
+
+# 작업용 스크래치 업로드. 어느 페이지에서도 참조하지 않으며 3.9MB.
+# mqx0rv5y-… 는 파일명 자체가 Gemini_Generated_Image + Photoroom 을 노출한다.
+mq*-image.png
+mqx0rv5y-*.png
+
+# 사이트에서 쓰지 않는 잔여물
+ui_kits-app-index.pdf
+
+# OS
+.DS_Store

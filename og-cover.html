@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>OG 커버 — 챠이로 쿠냐</title>
+<!-- Render target only: not linked from the site. Export at 1200×630 to
+     assets/og-cover.jpg to replace the current sips-composed cover. -->
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Gothic+A1:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Sacramento&display=swap" />
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  html, body { margin: 0; }
+  .og {
+    width: 1200px; height: 630px; overflow: hidden; position: relative;
+    display: grid; grid-template-columns: 1fr 440px; align-items: center;
+    background: repeating-linear-gradient(var(--bg) 0 39px, var(--bg-rule) 39px 40px);
+    font-family: var(--font-body); color: var(--fg);
+  }
+  .og__frame { position: absolute; inset: 16px; border: 3px solid var(--brand-brown);
+    border-radius: 20px; pointer-events: none; z-index: 4; }
+  .og__text { padding: 0 56px 0 84px; position: relative; z-index: 2; }
+  .og__eyebrow { font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.16em; font-size: 18px; color: var(--fg-muted); }
+  /* Face + tracking come from .t-script */
+  .og__h1 { font-size: 124px; line-height: .88; margin: 16px 0 0; color: var(--fg); }
+  .og__sub { font-family: var(--font-display); font-size: 35px; margin: 20px 0 0; }
+  .og__lead { font-size: 21px; line-height: 1.5; color: var(--fg-muted); margin: 16px 0 0; max-width: 30ch; }
+  .og__note { font-family: var(--font-hand); font-size: 32px; color: var(--brand-taupe);
+    margin-top: 24px; transform: rotate(-1.5deg); }
+
+  .og__photo { justify-self: center; position: relative; transform: rotate(-2.5deg); margin-right: 26px; }
+  .og__photo img { display: block; width: 308px; height: auto;
+    border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
+  .og__tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-3deg);
+    background: var(--tape-amber); color: var(--brand-brown-deep); font-family: var(--font-hand);
+    font-size: 24px; padding: 3px 24px; box-shadow: var(--shadow-tape); z-index: 3; }
+
+  /* A stamp is pressed, not stuck on: ±2° is the whole allowance (route A rule). */
+  .og__seal { position: absolute; bottom: 40px; left: 84px; width: 44px; height: 44px;
+    color: var(--brand-ink); opacity: .8; transform: rotate(-1.5deg); z-index: 1; }
+  .og__url { position: absolute; bottom: 40px; right: 56px; font-family: var(--font-mono);
+    font-size: 16px; letter-spacing: .04em; color: var(--fg-muted); z-index: 2; }
+</style>
+</head>
+<body>
+<div class="og">
+  <span class="og__frame" aria-hidden="true"></span>
+
+  <div class="og__text">
+    <div class="og__eyebrow">Chyaro Kunya · VTuber Fan Site</div>
+    <h1 class="og__h1 t-script">챠이로 쿠냐</h1>
+    <p class="og__sub">갈색 고양이 버추얼 스트리머</p>
+    <p class="og__lead">저챗 · 종합게임 · 노래로 만나는 INFP 고양이의 다꾸 노트.</p>
+    <p class="og__note">어서오냥, 쿠냥이 ♡</p>
+  </div>
+
+  <figure class="og__photo">
+    <span class="og__tape" aria-hidden="true">Chya ♡</span>
+    <img src="assets/chyaro-kunya-debut.png" alt="" />
+  </figure>
+
+  <!-- Brand mark · A 잉크 도장 — the watermark half of the locked A+C pair.
+       Spec: logo-identity-directions.html -->
+  <svg class="og__seal" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd" d="M6 15C6 10 10 6 15 6h34c5 0 9 4 9 9v34c0 5-4 9-9 9H15c-5 0-9-4-9-9z
+      M16 13l6.5 12.5c3-1.5 16-1.5 19 0L48 13l1.5 18c1 10-6.5 18-17.5 18s-19-8-17.5-18z"/>
+    <circle cx="25" cy="33" r="2.6"/>
+    <circle cx="39" cy="33" r="2.6"/>
+  </svg>
+  <span class="og__url">chyaro-kunya · fan site</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>챠이로 쿠냐 — 소개</title>
+<meta name="description" content="버추얼 스트리머 챠이로 쿠냐 소개 — 영원한 20살, 저챗·종합게임·노래 방송. 쿠냥이들 어서오냥." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#15110f" media="(prefers-color-scheme: dark)" />
+
+<!-- Social cards. og:image is absolute: X and Slack ignore relative paths, so a
+     bare "assets/…" silently yields a card with no image. If the repo is ever
+     renamed or moved to a custom domain, this URL must move with it. -->
+<meta property="og:type" content="profile" />
+<meta property="og:url" content="https://chnu-kim.github.io/chyaro-kunya/landing.html" />
+<meta property="og:site_name" content="챠이로 쿠냐 팬 사이트" />
+<meta property="og:title" content="챠이로 쿠냐 — 소개" />
+<meta property="og:description" content="저챗으로 도란도란, 게임으로 와글와글, 노래로 몽글몽글. 느긋하고 다정한 INFP 고양이." />
+<meta property="og:image" content="https://chnu-kim.github.io/chyaro-kunya/assets/og-cover.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="챠이로 쿠냐 데뷔 카드 일러스트" />
+<meta property="og:locale" content="ko_KR" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Gothic+A1:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Sacramento&display=swap" />
+<link rel="stylesheet" href="css/site.css" />
+<script>/* apply saved/system theme before first paint — no light-mode flash */try{var t=localStorage.getItem('ck-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+  /* ---- Hero ------------------------------------------------------------- */
+  .hero { padding: var(--space-8) 0 var(--space-7); }
+  .hero__grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: var(--space-8); align-items: center; }
+  .hero__kicker { display: inline-flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); flex-wrap: wrap; }
+  /* Latin name — the one string on the site that actually renders in Sacramento.
+     Face + tracking come from .t-script. */
+  .hero__h1 { font-size: var(--text-5xl); line-height: .95; }
+  .hero__sub { font-family: var(--font-display); font-size: var(--text-2xl); margin-top: var(--space-2); }
+  .hero__lead { font-size: var(--text-lg); color: var(--fg-muted); max-width: 48ch; margin: var(--space-4) 0 var(--space-6); }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .hero__note { font-family: var(--font-hand); font-size: var(--text-xl); color: var(--brand-taupe);
+    margin-top: var(--space-5); transform: rotate(-1.5deg); }
+  /* Real debut card — pinned with tape, single framing (the card already carries its own scrapbook decor) */
+  .hero__photo { position: relative; margin: 0; --rest-rot: -2deg; transform: rotate(var(--rest-rot));
+    transition: transform var(--dur-base) var(--ease-paper), box-shadow var(--dur-base); }
+  .hero__photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); box-shadow: var(--shadow-lift); }
+  .hero__photo:hover { transform: rotate(0deg) translateY(-4px); }
+  .hero__photo .tape { z-index: 2; }
+
+  /* ---- Profile spec ----------------------------------------------------- */
+  .profile { padding: var(--space-7) 0; }
+  .profile__head { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-5); flex-wrap: wrap; }
+  .profile__head h2 { font-size: var(--text-3xl); }
+  .profile__grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--space-7); align-items: start; }
+  /* Upper-body portrait pinned as a polaroid — the section's single flourish.
+     .polaroid carries the photo-paper surface + its dark-theme token island. */
+  .profile__photo { margin: 0; padding: 12px 12px 18px; --rest-rot: -2deg; transform: rotate(var(--rest-rot));
+    transition: transform var(--dur-base) var(--ease-paper); }
+  .profile__photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-xs); }
+  .profile__photo figcaption { margin-top: 10px; }
+  .profile__photo:hover { transform: rotate(0deg) translateY(-3px); }
+  .profile__photo .tape { z-index: 2; }
+  .spec { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .spec__item { padding: var(--space-5); }
+  .spec__item dt { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-muted);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .spec__item dd { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); }
+  .spec__item--wide { grid-column: span 3; }
+  .spec__item--wide dd { font-family: var(--font-body); font-weight: 500; font-size: var(--text-base); }
+
+  /* ---- Content / 컨텐츠 ------------------------------------------------- */
+  .content { padding: var(--space-7) 0; }
+  .content__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-5); }
+  .ccard { padding: var(--space-6); }
+  .ccard__ic { width: 30px; height: 30px; color: var(--fg); margin-bottom: var(--space-3); }
+  .ccard h3 { font-size: var(--text-xl); margin-bottom: var(--space-2); }
+  .ccard p { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
+
+  /* ---- Social ----------------------------------------------------------- */
+  .social { padding: var(--space-7) 0 var(--space-8); }
+  .social__panel { padding: var(--space-7); text-align: center; }
+  .social__panel h2 { font-size: var(--text-3xl); }
+  .social__panel p { color: var(--fg-muted); margin: var(--space-2) 0 var(--space-6); }
+  /* Inked charcoal mascot — the panel's single flourish. The artwork sits on the
+     page surface, so it follows the page theme via a src swap in site.js. */
+  .social__mascot { display: block; width: 116px; height: auto; margin: 0 auto var(--space-4);
+    transform: rotate(-3deg); transition: transform var(--dur-base) var(--ease-paper); }
+  .social__mascot:hover { transform: rotate(0deg) translateY(-3px); }
+  .social__row { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;
+    list-style: none; margin: 0; padding: 0; }
+  /* min-height 44: these are now real destinations, so they answer to the same
+     touch-target bar as every other control on the site. */
+  .slink { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; min-height: 44px;
+    box-sizing: border-box; text-decoration: none;
+    font-weight: 700; font-size: var(--text-sm); color: var(--fg);
+    background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
+    transition: transform var(--dur-fast) var(--ease-paper), box-shadow var(--dur-base); }
+  .slink:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+  .slink:active { transform: translateY(0); box-shadow: none; }
+  .slink svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .slink small { font-family: var(--font-mono); font-size: var(--text-2xs); letter-spacing: 0.02em;
+    color: var(--fg-muted); font-weight: 400; }
+  .slink__glyph { fill: var(--surface); }
+
+  @media (max-width: 860px) {
+    .hero__grid { grid-template-columns: 1fr; gap: var(--space-6); }
+    .hero__photo { max-width: 320px; order: -1; margin: 0 auto; }
+    .profile__grid { grid-template-columns: 1fr; gap: var(--space-6); }
+    .profile__photo { max-width: 300px; margin: 0 auto; }
+    .spec, .content__grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding: var(--space-6) 0; }
+    .spec, .content__grid { grid-template-columns: 1fr; }
+    .spec__item--wide { grid-column: auto; }
+    .hero__photo { --rest-rot: 0deg; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Brand mark · C 카오모지. 쿠냐가 이미 쓰는 얼굴 ﾐ๑•ﻌ•๑ﾐ 를 기하학으로 다시 그린 것.
+     A 잉크 도장과 한 쌍으로 확정 — A는 favicon.svg 와 OG 워터마크를 맡는다.
+     스펙: logo-identity-directions.html · 인라인인 이유: 외부 스프라이트 <use> 는
+     file:// 와 크로스오리진에서 죽는다. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="mk-kao" viewBox="0 0 64 22">
+    <circle cx="24" cy="6.5" r="3.6"/>
+    <circle cx="40" cy="6.5" r="3.6"/>
+    <path d="M32 14.3l-3.2-2.8h6.4z"/>
+    <g fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+      <path d="M32 14.3v1.8"/>
+      <path d="M32 16.1c-1.7 3.2-5.8 3.2-6.8-.4"/>
+      <path d="M32 16.1c1.7 3.2 5.8 3.2 6.8-.4"/>
+      <path d="M3 2.5h9M3 9.5h9M3 16.5h9"/>
+      <path d="M52 2.5h9M52 9.5h9M52 16.5h9"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="page">
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <!-- NAV -->
+  <header class="nav" data-od-id="site-nav">
+    <div class="nav__inner">
+      <a class="brand" href="index.html" aria-label="챠이로 쿠냐 홈">
+        <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
+        <span class="brand__name">챠이로 쿠냐</span>
+      </a>
+      <span class="brand__tag">VTUBER</span>
+      <span class="nav__spacer"></span>
+      <nav class="nav__links" aria-label="주 메뉴">
+        <a class="nav__link" href="landing.html" aria-current="page">소개</a>
+        <a class="nav__link" href="games.html">게임</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-od-id="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="다크 모드로 전환">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-h1" data-od-id="landing-hero">
+      <div class="wrap hero__grid">
+        <div>
+          <div class="hero__kicker">
+            <span class="chip chip--ink t-caps">Debut 2025.12.20</span>
+            <span class="t-hand" style="font-size:var(--text-xl);color:var(--brand-taupe)">데뷔 완료냥</span>
+          </div>
+          <h1 class="hero__h1 t-script" id="hero-h1" data-od-id="landing-title">Chyaro Kunya</h1>
+          <p class="hero__sub">갈색 고양이 버추얼 스트리머, <strong>챠이로 쿠냐</strong></p>
+          <p class="hero__lead">저챗으로 도란도란, 게임으로 와글와글, 노래로 몽글몽글. 느긋하고 다정한 INFP 고양이가 오늘도 방송에서 쿠냥이들을 기다려요.</p>
+          <div class="hero__cta" data-od-id="landing-cta">
+            <a class="btn btn--accent" href="#social" data-od-id="cta-channels">채널 보러가기</a>
+            <a class="btn btn--secondary" href="games.html" data-od-id="cta-games">플레이한 게임 보기</a>
+          </div>
+          <p class="hero__note">“천천히 놀다 가요, 쿠냥이 ﾐ๑•ﻌ•๑ﾐ”</p>
+        </div>
+
+        <figure class="hero__photo" data-od-id="landing-key-visual">
+          <span class="tape" aria-hidden="true">Chya ♡</span>
+          <img src="assets/kunya-debut-720.jpg" width="720" height="972" fetchpriority="high"
+               alt="챠이로 쿠냐 데뷔 카드 — 트윈테일 갈색 머리에 고양이 프린트 검은 스웨터, 레이스 미니스커트, 플랫폼 부츠 차림의 전신 일러스트" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- PROFILE SPEC -->
+    <section class="profile" aria-labelledby="profile-h2" data-od-id="profile">
+      <div class="wrap">
+        <div class="profile__head">
+          <span class="eyebrow">About</span>
+          <h2 id="profile-h2" data-od-id="profile-title">쿠냐 프로필</h2>
+        </div>
+        <div class="profile__grid">
+        <figure class="polaroid profile__photo" data-od-id="profile-photo">
+          <span class="tape" aria-hidden="true">Kunya ♡</span>
+          <img src="assets/kunya-portrait-600.png" width="600" height="763" loading="lazy" decoding="async"
+               alt="챠이로 쿠냐 상반신 — 트윈테일 갈색 머리에 고양이 프린트 검은 오프숄더 스웨터를 입은 모습" />
+          <figcaption>오늘도 방송에서 만나요</figcaption>
+        </figure>
+        <dl class="spec" data-od-id="profile-spec">
+          <div class="paper spec__item"><dt>이름</dt><dd>챠이로 쿠냐</dd></div>
+          <div class="paper spec__item"><dt>나이</dt><dd>영원한 20살</dd></div>
+          <div class="paper spec__item"><dt>생일</dt><dd>10월 5일</dd></div>
+          <div class="paper spec__item"><dt>팬네임</dt><dd>쿠냥이</dd></div>
+          <div class="paper spec__item"><dt>MBTI</dt><dd>INFP</dd></div>
+          <div class="paper spec__item"><dt>데뷔일</dt><dd>2025.12.20</dd></div>
+          <div class="paper spec__item spec__item--wide">
+            <dt>한마디</dt>
+            <dd>느긋하고 감수성 풍부한 갈색 고양이. 방송에선 다정하지만 가끔 엣지있는 반전 매력 — 키치와 고딕이 한 몸에.</dd>
+          </div>
+        </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENT -->
+    <section class="content" aria-labelledby="content-h2" data-od-id="contents">
+      <div class="wrap">
+        <div class="profile__head">
+          <span class="eyebrow">Contents</span>
+          <h2 id="content-h2" data-od-id="contents-title">주요 컨텐츠</h2>
+        </div>
+        <div class="content__grid" data-od-id="contents-grid">
+          <div class="paper ccard" data-od-id="content-card-chat">
+            <svg class="ccard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 3z"/></svg>
+            <h3>저챗</h3>
+            <p>저스트 채팅. 하루 이야기, 고민 상담, 쿠냥이들과 도란도란 수다 떠는 시간.</p>
+          </div>
+          <div class="paper ccard" data-od-id="content-card-games">
+            <svg class="ccard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 11v2M7 12h2M15.5 11.5h.01M17.5 13.5h.01"/></svg>
+            <h3>종합 게임</h3>
+            <p>장르 가리지 않는 종합 게임 방송. 힐링부터 호러·소울라이크까지 폭넓게.</p>
+          </div>
+          <div class="paper ccard" data-od-id="content-card-song">
+            <svg class="ccard__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+            <h3>노래</h3>
+            <p>가끔 찾아오는 노래 방송. 잔잔한 발라드부터 신나는 애니송까지.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOCIAL -->
+    <section class="social" id="social" aria-labelledby="social-h2" data-od-id="social">
+      <div class="wrap">
+        <div class="paper social__panel" data-od-id="social-panel">
+          <span class="clip" aria-hidden="true"></span>
+          <img class="social__mascot" src="assets/kunyang-mascot-ink.png"
+               data-img-light="assets/kunyang-mascot-ink.png" data-img-dark="assets/kunyang-mascot.png"
+               width="206" height="308" loading="lazy" decoding="async"
+               alt="팬 마스코트 쿠냥이 — 박쥐 날개를 단 검은 고양이" />
+          <span class="eyebrow">Follow</span>
+          <h2 id="social-h2" data-od-id="social-title">어디서 만날까냥</h2>
+          <p>치지직에서 방송하고, 유튜브에 클립 올리고, X로 소식 전해요.</p>
+          <!-- A real <ul>/<li> rather than role="list"/role="listitem": putting
+               role="listitem" on an <a> overrides its link role, so a screen
+               reader stops announcing it as a link at all. Native list markup
+               needs no ARIA and keeps both roles. -->
+          <ul class="social__row" data-od-id="social-links">
+            <li>
+              <a class="slink" href="https://chzzk.naver.com/97c69a12835bba786fb82f2c849f2ba8"
+                 target="_blank" rel="noopener noreferrer" data-od-id="social-link-chzzk">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path class="slink__glyph" d="M8 9l6 3-6 3z"/></svg>
+                치지직 <small>라이브</small><span class="sr-only">(새 창에서 열림)</span>
+              </a>
+            </li>
+            <li>
+              <a class="slink" href="https://www.youtube.com/@CHYAILOKUNYA"
+                 target="_blank" rel="noopener noreferrer" data-od-id="social-link-youtube">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path class="slink__glyph" d="M10 9l5 3-5 3z"/></svg>
+                YouTube <small>@CHYAILOKUNYA</small><span class="sr-only">(새 창에서 열림)</span>
+              </a>
+            </li>
+            <li>
+              <a class="slink" href="https://x.com/chyailokunya"
+                 target="_blank" rel="noopener noreferrer" data-od-id="social-link-x">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h4.5l4 5.6L16.5 3H21l-6.6 8.4L21.5 21H17l-4.4-6.1L7 21H3l7-8.9z"/></svg>
+                X <small>@chyailokunya</small><span class="sr-only">(새 창에서 열림)</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="foot" data-od-id="site-footer">
+    <div class="foot__inner">
+      <div class="brand">
+        <svg class="brand__cat" aria-hidden="true"><use href="#mk-kao"/></svg>
+        <span class="brand__name">챠이로 쿠냐</span>
+      </div>
+      <small>© <span data-year>2026</span> Chyaro Kunya · 비공식 팬 사이트 · 쿠냥이 환영</small>
+      <img class="foot__mascot" src="assets/kunyang-mascot.png" width="206" height="308"
+           alt="" aria-hidden="true" loading="lazy" decoding="async" />
+    </div>
+  </footer>
+</div>
+
+<script src="js/site.js"></script>
+</body>
+</html>

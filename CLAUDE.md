@@ -9,19 +9,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 빠른 요약
 
-> **이 저장소는 구 정적 사이트다.** 후속 Next.js 풀스택 버전이 형제 디렉터리
-> `../chyailokunya`(repo `chnu-kim/chyailokunya`)에 있고 **`https://chyailokunya.com` 이 이미
-> 그쪽을 서빙한다**(2026-07-19 컷오버). 여기 변경은 GitHub Pages URL 에만 반영된다 —
-> 새 기능은 웬만하면 새 저장소에서 한다. 구 사이트는 Phase 5 정리까지 유지.
+> **이 저장소는 은퇴했다** — 자세한 내용은 위 `AGENTS.md` 의 "이 저장소가 무엇인가".
 
 버추얼 스트리머 챠이로 쿠냐의 비공식 팬 사이트. **정적 HTML/CSS/JS · 빌드 없음 ·
-의존성 없음 · 테스트 없음.** 저장소 루트를 GitHub Pages 가 그대로 서빙한다
-(<https://chnu-kim.github.io/chyaro-kunya/>).
+의존성 없음 · 테스트 없음.** 저장소 루트를 GitHub Pages 가 서빙하던 구조다.
 
 빌드 시스템이 없다는 건 검증을 대신해 줄 게 아무것도 없다는 뜻이다. 타입 체커도,
-린터도, 테스트도 잡아주지 않으므로 **브라우저에서 직접 확인하거나 배포 URL 을 찔러
-확인한다.** 아래 "구조 — 왜 이렇게 되어 있나"의 제약들이 문서에만 존재하고 코드로
-강제되지 않는 이유이기도 하다.
+린터도, 테스트도 잡아주지 않으므로 **로컬 서버로 띄워 브라우저에서 직접 확인한다.**
+아래 "구조 — 왜 이렇게 되어 있나"의 제약들이 문서에만 존재하고 코드로 강제되지 않는
+이유이기도 하다.
 
 ## 명령어
 
@@ -31,12 +27,10 @@ python3 -m http.server          # 로컬 서버 → http://localhost:8000
 
 sips -Z 336 assets/원본.png --out assets/파생-336.jpg   # 이미지 파생본 (macOS, WebP 불가)
 
-# 배포는 main 에 푸시하면 GitHub Pages 가 자동 빌드 (~50초)
-# remote 는 HTTPS 여야 한다 — 이유는 AGENTS.md "gh 계정 전환은 SSH 키 신원을 바꾸지 않는다"
+# 배포 대상 없음 — GitHub Pages 는 종료됐고 chyailokunya.com 이 정본이다.
+# 그래도 푸시할 일이 있다면 remote 는 HTTPS 여야 한다 — 이유는
+# AGENTS.md "gh 계정 전환은 SSH 키 신원을 바꾸지 않는다"
 git -c credential.helper='!gh auth git-credential' push origin main
-
-# 푸시 후 검증: 추측하지 말고 실제로 찌른다
-curl -sI https://chnu-kim.github.io/chyaro-kunya/ | head -1
 ```
 
 ## 구조 — 왜 이렇게 되어 있나
@@ -63,7 +57,7 @@ noindex 페이지(`logo-identity-directions.html` · `og-cover.html` · `paw-sha
 - **파일 수정 전 반드시 Read.** 특히 `css/site.css` 는 토큰이 서로를 참조하므로
   한 값만 보고 고치면 파생 토큰이 깨진다.
 - **od export 는 이 런타임에 없다.** HTML 을 이미지로 렌더할 경로가 없으니
-  `og-cover.jpg` 같은 렌더 산출물은 사용자에게 캡처를 요청한다.
+  렌더 산출물이 필요하면 사용자에게 캡처를 요청한다.
 - **브라우저 자동화(Playwright/headless)를 쓰지 않는다.** 시각 확인이 필요하면
   사용자에게 보여주고 물어본다.
 - PR 을 만들면(`gh pr create`) 직후 `/codex-pr-review --base <base>` 를 실행한다

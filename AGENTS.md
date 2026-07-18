@@ -110,6 +110,12 @@ Open Design 내부 메타데이터(`*.artifact.json`, `.od-skills/`), 미참조 
   카드가 나간다. 저장소 이름을 바꾸거나 커스텀 도메인을 붙이면 세 페이지의
   `og:image`/`og:url` 을 같이 옮겨야 한다. `landing.html` 은 `og:type` 이
   `website` 가 아니라 `profile` 이라 앵커가 다르니 별도로 확인한다.
+
+  **은퇴 후: 세 페이지의 `og:image`/`og:url` 은 `chnu-kim.github.io` 를 가리키는 채로
+  일부러 남겨 둔다.** 이 저장소는 실제로 배포됐던 것의 보존 스냅샷이라, 배포된 적 없는
+  URL 로 메타데이터를 고치면 기록이 사실과 달라진다. Pages 를 종료했으므로 그 origin 은
+  응답하지 않는다 — 카드를 그리는 크롤러도 없다. **이 URL 을 "고쳐야 할 잔재"로 보고
+  chyailokunya.com 으로 바꾸지 마라.** 새 사이트의 og 는 새 저장소가 따로 쥐고 있다.
 - **`gh` 계정 전환은 SSH 키 신원을 바꾸지 않는다.** 이 머신엔 GitHub 계정이 둘
   로그인돼 있고, 저장소 소유자(`chnu-kim`)가 SSH 키 주인이 아니다. remote 가 SSH 면
   `gh` 활성 계정을 chnu-kim 으로 맞춰도 푸시는 키 주인 명의로 나가 거부된다.

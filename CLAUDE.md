@@ -9,6 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 빠른 요약
 
+> **이 저장소는 구 정적 사이트다.** 후속 Next.js 풀스택 버전이 형제 디렉터리
+> `../chyailokunya`(repo `chnu-kim/chyailokunya`)에 있고 **`https://chyailokunya.com` 이 이미
+> 그쪽을 서빙한다**(2026-07-19 컷오버). 여기 변경은 GitHub Pages URL 에만 반영된다 —
+> 새 기능은 웬만하면 새 저장소에서 한다. 구 사이트는 Phase 5 정리까지 유지.
+
 버추얼 스트리머 챠이로 쿠냐의 비공식 팬 사이트. **정적 HTML/CSS/JS · 빌드 없음 ·
 의존성 없음 · 테스트 없음.** 저장소 루트를 GitHub Pages 가 그대로 서빙한다
 (<https://chnu-kim.github.io/chyaro-kunya/>).
